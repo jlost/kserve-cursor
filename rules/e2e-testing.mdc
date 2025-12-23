@@ -1,0 +1,20 @@
+---
+description: E2E testing scripts, markers, and VS Code tasks
+globs: test/**/*
+alwaysApply: false
+---
+
+# E2E Testing
+
+Test scripts are in `test/scripts/openshift-ci/`. VS Code tasks are available:
+- "Setup E2E" - Initialize test environment
+- "Teardown E2E" - Clean up test resources
+- "Recreate E2E ns" - Reset test namespace
+- "Devspace Dev" - Remote debugging with devspace
+
+## Test Markers
+
+- `kserve_on_openshift` - OpenShift-specific tests
+- `predictor` - Predictor functionality tests
+- `graph` - Inference graph tests
+- `path_based_routing` - Path-based routing tests

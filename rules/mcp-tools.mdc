@@ -1,0 +1,13 @@
+---
+description: Available MCP tools for cross-repository workflows
+alwaysApply: true
+---
+
+# Available MCP Tools
+
+Use these tools for cross-repository workflows:
+
+- **JIRA MCP**: Search RHOAIENG issues, get issue details, find related work
+- **GitHub MCP**: Search PRs/issues across forks, get commit details, compare branches
+- **Slack MCP**: Search for discussions about issues/PRs
+- **Kubernetes MCP**: Debug cluster state during E2E testing

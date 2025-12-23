@@ -1,0 +1,55 @@
+---
+description: KServe three-tier fork hierarchy and branch targeting rules
+alwaysApply: true
+---
+
+# KServe Fork Structure
+
+This project is a fork of KServe with a three-tier fork hierarchy. Always consider this context when assisting with development tasks.
+
+## Fork Hierarchy
+
+```
+kserve/kserve (upstream)
+    |
+    v
+opendatahub-io/kserve (midstream/ODH)
+    |
+    v
+red-hat-data-services/kserve (downstream/RHODS)
+```
+
+## Git Remote Naming Convention
+
+When working with git commands or analyzing branches, expect these remote names:
+- `upstream` or `kserve` -> kserve/kserve
+- `odh` -> opendatahub-io/kserve
+- `downstream` -> red-hat-data-services/kserve
+- `origin` -> user's personal fork
+
+## Branch Targeting Rules
+
+When determining which branch to base work on:
+
+| Change Type | Target Fork | Base Branch |
+|-------------|-------------|-------------|
+| New upstream feature | kserve/kserve | `master` |
+| ODH-specific feature | opendatahub-io/kserve | `master` or `release-vX.Y` |
+| Downstream-only change | red-hat-data-services/kserve | `main` |
+| Cherry-pick to ODH | opendatahub-io/kserve | `master` or `release-vX.Y` |
+| Cherry-pick to downstream | red-hat-data-services/kserve | `main` |
+| Backport from downstream | opendatahub-io/kserve | `master` |
+
+## Code Sync Patterns
+
+When syncing code between forks:
+1. Upstream releases are merged into ODH `master` periodically
+2. ODH release branches are cut from `master` after upstream release integration
+3. Cherry-picks flow: upstream -> ODH -> downstream
+4. Bug fixes may flow: downstream -> ODH -> upstream (backports)
+
+## Reference Documentation
+
+- Multi-fork workflow guide: `.vscode/multi-fork-workflow.md`
+- ODH contribution guide: `CONTRIBUTING.md`
+- Upstream release fetch process: `docs/odh/fetch-upstream-release.md`

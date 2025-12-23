@@ -1,0 +1,45 @@
+---
+description: JIRA integration and cross-repository GitHub reference handling
+alwaysApply: true
+---
+
+# JIRA and GitHub Integration
+
+## JIRA Integration
+
+- Primary project key: **RHOAIENG**
+- When searching for issues, use RHOAIENG as the default project
+- Issues may reference commits/PRs across all three forks
+- Always check if a JIRA has existing PRs in any fork before starting work
+
+### Fetching JIRA Context
+
+When fetching a JIRA issue, always:
+1. Use `fields: *all` and `expand: changelog` to get complete information
+2. Check the changelog for **RemoteIssueLink** entries - these contain GitHub PR/issue links
+3. Follow ALL linked PRs, issues, and related JIRAs to build full context
+4. Check parent issues and sub-tasks for additional context
+
+### Resolving Ambiguous GitHub References
+
+GitHub PR/issue numbers (e.g., "#942") are **repository-specific** and ambiguous:
+- A reference to "#942" in a JIRA could be from any of the three forks
+- Cherry-pick PRs often mention the original PR number from a different fork
+- If a referenced PR seems unrelated, check the same number in other forks:
+  - `kserve/kserve#942`
+  - `opendatahub-io/kserve#942`
+  - `red-hat-data-services/kserve#942`
+- The JIRA changelog's RemoteIssueLink usually includes the full URL which disambiguates the repo
+
+## PR Description Conventions
+
+When creating or reviewing PRs:
+
+1. **Cherry-picks**: Include source reference in description
+   - Example: "Cherry-pick of kserve/kserve#1234"
+   - Example: "Backport of opendatahub-io/kserve#567"
+
+2. **JIRA references**: Include JIRA key in title or description
+   - Example: "[RHOAIENG-1234] Fix validation bug"
+
+3. **Cross-fork coordination**: Note if PR needs cherry-picking to other forks

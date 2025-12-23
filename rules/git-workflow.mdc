@@ -1,0 +1,60 @@
+---
+description: Git workflow including worktrees, commit signing, and PR policies
+alwaysApply: true
+---
+
+# Git Workflow
+
+## PR Creation Policy
+
+**Always require user review before creating any PR.** Present the complete PR details (title, description, target repo/branch, commits) and wait for explicit approval before calling any GitHub PR creation tools.
+
+**Always create PRs as drafts.** Use `draft: true` when creating pull requests.
+
+**Use the PR template.** Base PR descriptions on `.github/PULL_REQUEST_TEMPLATE.md`, deleting irrelevant sections to reduce noise. Keep only applicable checkboxes and fill in relevant details.
+
+## Commit Signing Requirements
+
+All commits must include:
+- **Signed-off-by** (`-s`): DCO signoff line in commit message
+- **GPG signature** (`-S`): Cryptographic signature
+
+Always use `git commit -s -S` when creating commits.
+
+## Git Worktrees
+
+**Always use worktrees for tasks.** Keep the main repo clean (fetch-only).
+
+**Always run setup and open worktrees in Cursor after creation.** Run the setup script from the main repo to symlink `.vscode` and `.cursor`, then open in Cursor.
+
+```bash
+# From main repo
+cd ~/projects/odh-kserve
+git fetch --all
+git worktree add ../odh-kserve-RHOAIENG-1234 -b RHOAIENG-1234/fix odh/release-v0.15
+
+# Setup worktree (symlinks .vscode/.cursor from main repo)
+.vscode/scripts/setup-worktree.sh ../odh-kserve-RHOAIENG-1234
+
+# Open in Cursor
+cursor ../odh-kserve-RHOAIENG-1234
+
+# Optional: setup Python venv (in the new Cursor window)
+.vscode/scripts/setup-dev-env.sh
+
+# After PR merges, cleanup
+cd ~/projects/odh-kserve
+git worktree remove ../odh-kserve-RHOAIENG-1234
+```
+
+**Pass an initial prompt** to copy to clipboard when setting up the worktree:
+
+```bash
+.vscode/scripts/setup-worktree.sh ../odh-kserve-RHOAIENG-1234 --prompt "/jira RHOAIENG-1234"
+```
+
+The prompt is copied to clipboard and saved to `.agent-prompt` in the worktree.
+
+**Always use `/jira TICKET-ID` format** for initial prompts so the new agent fetches full Jira context.
+
+See `.vscode/multi-fork-workflow.md` for detailed patterns.
