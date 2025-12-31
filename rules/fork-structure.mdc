@@ -51,19 +51,38 @@ When determining which branch to base work on:
 | Change Type | Target Fork | Base Branch |
 |-------------|-------------|-------------|
 | New upstream feature | kserve/kserve | `master` |
-| ODH-specific feature | opendatahub-io/kserve | `master` or `release-vX.Y` |
-| Downstream-only change | red-hat-data-services/kserve | `main` |
-| Cherry-pick to ODH | opendatahub-io/kserve | `master` or `release-vX.Y` |
-| Cherry-pick to downstream | red-hat-data-services/kserve | `main` |
+| ODH-specific feature (latest) | opendatahub-io/kserve | `master` |
+| ODH-specific feature (older) | opendatahub-io/kserve | `release-vX.Y` or `stable-X.x` |
+| Downstream-only change (latest) | red-hat-data-services/kserve | `main` |
+| Downstream-only change (older) | red-hat-data-services/kserve | `rhoai-X.Y` |
 | Backport from downstream | opendatahub-io/kserve | `master` |
+
+### Branch Mapping Between Forks
+
+ODH and downstream branches correspond to specific RHOAI product versions:
+
+| RHOAI Version | ODH Branch | Downstream Branch |
+|---------------|------------|-------------------|
+| 3.x (latest)  | `master`   | `main`            |
+| 2.x (stable)  | `stable-2.x` or `release-vX.Y` | `rhoai-2.Y` |
+
+### Cherry-Pick Flow
+
+**Always go through ODH first.** Changes flow: upstream -> ODH -> downstream.
+
+To get a fix into a specific RHOAI version:
+1. First merge to the corresponding ODH branch (e.g., `odh/stable-2.x` for RHOAI 2.25)
+2. Then cherry-pick to the corresponding downstream branch (e.g., `downstream/rhoai-2.25`)
+
+**Never target downstream directly** without first having the change in ODH.
 
 ## Code Sync Patterns
 
 When syncing code between forks:
 1. Upstream releases are merged into ODH `master` periodically
 2. ODH release branches are cut from `master` after upstream release integration
-3. Cherry-picks flow: upstream -> ODH -> downstream
-4. Bug fixes may flow: downstream -> ODH -> upstream (backports)
+3. Cherry-picks flow: upstream -> ODH -> downstream (always ODH first)
+4. Bug fixes may flow: ODH -> upstream (backports)
 
 ## Reference Documentation
 

@@ -21,11 +21,68 @@ All commits must include:
 
 Always use `git commit -s -S` when creating commits.
 
+## Commit Message Conventions
+
+Follow [Conventional Commits](https://www.conventionalcommits.org/) format for upstream contributions:
+
+```
+<type>: <description> (#PR)
+
+<optional body>
+
+Signed-off-by: Your Name <email@example.com>
+```
+
+### Type Prefixes
+
+| Prefix | Usage |
+|--------|-------|
+| `feat:` | New features |
+| `fix:` | Bug fixes |
+| `chore:` | Maintenance, dependency updates |
+| `ci:` | CI/CD changes |
+| `docs:` | Documentation |
+
+### Optional Scope
+
+Include scope in parentheses when helpful: `fix(llmisvc): description`
+
+### Examples
+
+```
+feat: Add pathTemplate configuration for inference service routing (#4817)
+
+Signed-off-by: Your Name <email@example.com>
+```
+
+```
+fix: clear stale router and scheduler conditions on config changes (#4876)
+
+Signed-off-by: Your Name <email@example.com>
+```
+
+### CVE References
+
+For security fixes, reference the CVE directly in the subject:
+```
+CVE-2024-43598: Update lightgbm version to 4.6.0 (#4799)
+```
+
+### Multi-Author Commits
+
+When multiple contributors are involved, add Co-authored-by trailers:
+```
+Signed-off-by: Primary Author <primary@example.com>
+Co-authored-by: Other Contributor <other@example.com>
+```
+
 ## Git Worktrees
 
 **Always use worktrees for tasks.** Keep the main repo clean (fetch-only).
 
 **Worktrees are for tasks, not branches.** If the target fork/branch was wrong, rebase the worktree in-place rather than creating a new worktree. The task hasn't changed, just the base.
+
+**Run worktree commands automatically.** Don't just present commands - execute them directly using terminal tools. Run setup script and open in Cursor after creation.
 
 **Always run setup and open worktrees in Cursor after creation.** Run the setup script from the main repo to symlink `.vscode` and `.cursor`, then open in Cursor.
 
