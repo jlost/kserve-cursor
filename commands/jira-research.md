@@ -177,3 +177,5 @@ Expected flow:
 - `/jira` - Quick context fetch (no deep search, no JIRA comment)
 - `/jira-work` - Full workflow: research -> worktree creation
 
+
+

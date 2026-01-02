@@ -108,4 +108,7 @@ Expected flow:
 - `/jira-research` - Research only, no worktree creation
 - `/jira` - Quick context fetch (runs automatically in new worktree)
 - `/pr-target` - Determine PR target for existing changes
+- `/spinoff-pr` - Spin off unrelated changes to a separate PR
+
+
 

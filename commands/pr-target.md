@@ -73,3 +73,8 @@ Suggested workflow:
 PR Title: "Fix nil pointer panic when transformer config is missing"
 ```
 
+## Related Commands
+
+- `/jira-work` - Full JIRA-based workflow with research and worktree creation
+- `/spinoff-pr` - Spin off unrelated changes to a separate PR
+
