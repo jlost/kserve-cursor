@@ -116,13 +116,35 @@ git reset --hard upstream/master
 git stash pop
 ```
 
-**Pass an initial prompt** to copy to clipboard when setting up the worktree:
+**Create a handoff prompt** with full context for the new agent session. Write the prompt to `.agent-prompt` in the worktree before running setup:
 
 ```bash
-.cursor/scripts/setup-worktree.sh ../kserve-RHOAIENG-1234 --prompt "/jira RHOAIENG-1234"
+# Create handoff prompt with full context
+cat > ../kserve-RHOAIENG-1234/.agent-prompt <<'EOF'
+Context:
+- JIRA: RHOAIENG-1234 - Fix stale route cleanup after serverless deletion
+- Target: odh/release-v0.15 (2.25 patch, ODH-specific OpenShift Route handling)
+
+Research findings:
+- Routes in istio-system not cleaned up when Serverless isvc deleted
+- OpenShift Route handling is ODH-specific (not in upstream)
+- No existing fix in any fork
+
+Next steps:
+- Investigate Route cleanup in ingress reconciler
+- Add cross-namespace Route deletion on isvc delete
+- Add e2e test for serverless-to-raw migration
+EOF
+
+# Setup worktree (symlinks .vscode/.cursor, copies prompt to clipboard)
+.vscode/scripts/setup-worktree.sh ../kserve-RHOAIENG-1234 --open
 ```
 
-The prompt is copied to clipboard and saved to `.agent-prompt` in the worktree.
+The `.agent-prompt` file is copied to clipboard by `setup-worktree.sh` so you can paste it into the new Cursor window.
 
-**Always use `/jira TICKET-ID` format** for initial prompts so the new agent fetches full Jira context.
+**Include in the handoff prompt:**
+- JIRA key and summary
+- Target fork/branch with rationale
+- Key research findings (linked PRs, root cause hypothesis)
+- Concrete next steps for implementation
 

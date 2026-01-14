@@ -8,7 +8,9 @@ Given a JIRA key (e.g., RHOAIENG-1234), perform the following:
 
 1. **Get JIRA details** using JIRA MCP:
    - Fetch the issue with `fields: *all` and `expand: changelog` to get full context
+   - **Fetch comments separately** - `fields: *all` does NOT include comments. Make a second call with `fields: comment`. Upstream PR links are often only in comments.
    - Check the changelog for **RemoteIssueLink** entries - these contain linked GitHub PRs/issues
+   - Check comments for PR links (especially for upstream PRs)
    - Check for linked JIRA issues (parent epics, sub-tasks, related issues)
    - Note any fix versions or target releases
 

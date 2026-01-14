@@ -1,31 +1,11 @@
 ---
-description: Repository-specific fork details
+description: ODH two-tier fork hierarchy and branch targeting rules
 alwaysApply: true
----
-
-# Repository: odh-model-controller
-
-## Fork Details
-
-| Fork | Repository |
-|------|------------|
-| Upstream | (none - ODH-native) |
-| ODH | opendatahub-io/odh-model-controller |
-| Downstream | red-hat-data-services/odh-model-controller |
-
-## ODH Default Branch
-
-`master`
-
-## Reference Documentation
-
-- ODH contribution guide: `CONTRIBUTING.md`
-
 ---
 
 # ODH Fork Structure
 
-This project follows a two-tier fork hierarchy (no upstream). Always consider this context when assisting with development tasks.
+This project follows a two-tier fork hierarchy (ODH-native, no upstream). Always consider this context when assisting with development tasks.
 
 ## Fork Hierarchy
 

@@ -1,0 +1,54 @@
+{
+  "mcpServers": {
+    "github": {
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_MCP_TOKEN}"
+      }
+    },
+    "mcp-atlassian": {
+      "command": "podman",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "-e",
+        "JIRA_URL",
+        "-e",
+        "JIRA_PERSONAL_TOKEN",
+        "-e",
+        "JIRA_SSL_VERIFY",
+        "ghcr.io/sooperset/mcp-atlassian:latest"
+      ],
+      "env": {
+        "JIRA_URL": "${JIRA_URL}",
+        "JIRA_PERSONAL_TOKEN": "${JIRA_PERSONAL_TOKEN}",
+        "JIRA_SSL_VERIFY": "true"
+      }
+    },
+    "slack": {
+      "command": "podman",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "SLACK_XOXC_TOKEN",
+        "-e",
+        "SLACK_XOXD_TOKEN",
+        "-e",
+        "MCP_TRANSPORT",
+        "-e",
+        "LOGS_CHANNEL_ID",
+        "quay.io/redhat-ai-tools/slack-mcp"
+      ],
+      "env": {
+        "SLACK_XOXC_TOKEN": "${SLACK_XOXC_TOKEN}",
+        "SLACK_XOXD_TOKEN": "${SLACK_XOXD_TOKEN}",
+        "MCP_TRANSPORT": "stdio",
+        "LOGS_CHANNEL_ID": "C7000000"
+      }
+    }
+  }
+}
+

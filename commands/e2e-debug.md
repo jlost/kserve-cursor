@@ -11,7 +11,7 @@ When E2E tests fail, systematically gather information to diagnose the issue.
    - What was the test attempting to do?
    - Is this a new failure or regression?
 
-2. **Check cluster state** using Kubernetes MCP:
+2. **Check cluster state**:
    - List pods in test namespace (`kserve-ci-e2e-test` by default)
    - Check pod status and restart counts
    - Look for pending/failed pods
@@ -67,7 +67,7 @@ Error message (if available): {{error_message}}
 
 Test namespace: {{namespace}} (default: kserve-ci-e2e-test)
 
-## Kubernetes MCP Queries
+## Cluster State Queries
 
 Use these to gather cluster state:
 

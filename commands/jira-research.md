@@ -10,8 +10,10 @@ Given a JIRA key (e.g., RHOAIENG-1234), perform a comprehensive investigation:
 
 Use JIRA MCP to get full context:
 - Fetch the issue with `fields: *all` and `expand: changelog`
+- **Fetch comments separately** - `fields: *all` does NOT include comments. Make a second call with `fields: comment`. Upstream PR links are often only in comments.
 - Extract: summary, description, issue type, fix versions, priority, assignee
 - Check the changelog for **RemoteIssueLink** entries (GitHub PRs/issues)
+- Check comments for PR links (especially for upstream PRs)
 - Check for linked JIRA issues (parent epics, sub-tasks, related issues)
 - **Extract key terms** for deep search:
   - Error messages, stack traces, log snippets
@@ -176,6 +178,9 @@ Expected flow:
 
 - `/jira` - Quick context fetch (no deep search, no JIRA comment)
 - `/jira-work` - Full workflow: research -> worktree creation
+
+
+
 
 
 

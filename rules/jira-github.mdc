@@ -16,9 +16,11 @@ alwaysApply: true
 
 When fetching a JIRA issue, always:
 1. Use `fields: *all` and `expand: changelog` to get complete information
-2. Check the changelog for **RemoteIssueLink** entries - these contain GitHub PR/issue links
-3. Follow ALL linked PRs, issues, and related JIRAs to build full context
-4. Check parent issues and sub-tasks for additional context
+2. **Fetch comments separately** - `fields: *all` does NOT include comments. Make a second call with `fields: comment` or include `comment` explicitly in the fields list. Upstream PR links are often in comments (since DPTP bot doesn't auto-link them).
+3. Check the changelog for **RemoteIssueLink** entries - these contain GitHub PR/issue links
+4. Check comments for PR links (especially for upstream PRs where DPTP bot doesn't create RemoteIssueLinks)
+5. Follow ALL linked PRs, issues, and related JIRAs to build full context
+6. Check parent issues and sub-tasks for additional context
 
 ### Resolving Ambiguous GitHub References
 
@@ -59,6 +61,17 @@ jira_create_remote_issue_link(
   title="Upstream PR: fix pod init container status watch"
 )
 ```
+
+**Note:** The `jira_create_remote_issue_link` MCP tool may report success but fail silently. After using it, verify the link appears in the JIRA. If not, add a comment with the PR link as a fallback:
+
+```
+jira_add_comment(
+  issue_key="RHOAIENG-1234",
+  comment="Upstream PR: https://github.com/kserve/kserve/pull/4910"
+)
+```
+
+The URL in the comment will be clickable and provides traceability, even though it won't appear in the Links section.
 
 ### ODH/Downstream PRs (opendatahub-io/kserve, red-hat-data-services/kserve)
 

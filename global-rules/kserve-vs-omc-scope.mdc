@@ -1,0 +1,42 @@
+---
+description: Distinguish between KServe and odh-model-controller responsibilities
+alwaysApply: true
+---
+
+# odh-model-controller Scope
+
+This controller **extends** KServe with OpenShift/ODH integrations. It does NOT implement core model serving.
+
+## Belongs to odh-model-controller
+
+- OpenShift Routes (creation, TLS, timeouts)
+- ServiceMeshMember / Istio resources (PeerAuth, Telemetry)
+- AuthConfig (Authorino) / AuthPolicy (Kuadrant)
+- NetworkPolicy resources
+- ServiceMonitor / PodMonitor / metrics dashboards
+- CA certificate trust (odh-trusted-ca-bundle, etc.)
+- NVIDIA NIM Account management
+- Model Registry sync
+- Webhooks (protected namespace validation, default annotations)
+
+## Belongs to KServe (NOT this repo)
+
+- Predictor/Transformer/Explainer Deployments
+- Model loading, storage access, container images
+- Autoscaling (HPA/VPA, scale-to-zero)
+- Knative Service creation (Serverless mode)
+- ServingRuntime container specs
+- Inference request/response handling
+
+## Quick Reference
+
+| Symptom | Owner |
+|---------|-------|
+| Route missing/wrong TLS | omc |
+| Model fails to load | kserve |
+| AuthConfig missing | omc |
+| Pod won't start | kserve |
+| ServiceMeshMember missing | omc |
+| Inference errors | kserve |
+| Metrics not scraped | omc |
+| Autoscaling broken | kserve |
