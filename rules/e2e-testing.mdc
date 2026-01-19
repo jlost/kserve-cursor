@@ -6,15 +6,42 @@ alwaysApply: false
 
 # E2E Testing
 
-Test scripts are in `test/scripts/openshift-ci/`. VS Code tasks are available:
-- "Setup E2E" - Initialize test environment
-- "Teardown E2E" - Clean up test resources
-- "Recreate E2E ns" - Reset test namespace
-- "Devspace Dev" - Remote debugging with devspace
+Choose setup path based on the fork you're working on.
+
+## Setup Paths
+
+### Upstream (kserve/kserve) - Kind Cluster
+
+```tool
+ignition_mcp-tasks_task_kind_refresh
+ignition_mcp-tasks_task_install_kserve_dependencies
+ignition_mcp-tasks_task_install_network_dependencies
+ignition_mcp-tasks_task_clean_deploy_kserve
+ignition_mcp-tasks_task_patch_deployment_mode
+ignition_mcp-tasks_task_setup_e2e_port_forward_kind
+```
+
+### ODH/RHOAI - OpenShift (E2E Path)
+
+```tool
+ignition_mcp-tasks_task_crc_refresh
+ignition_mcp-tasks_task_pull_secret
+ignition_mcp-tasks_task_setup_e2e
+ignition_mcp-tasks_task_recreate_e2e_ns
+```
+
+## Before Running Tests
+
+1. **Activate the venv:** `source python/kserve/.venv/bin/activate`
+2. **Recreate the namespace:**
+   - Kind: `ignition_mcp-tasks_task_recreate_e2e_ns_upstream`
+   - OpenShift: `ignition_mcp-tasks_task_recreate_e2e_ns`
 
 ## Test Markers
 
-- `kserve_on_openshift` - OpenShift-specific tests
-- `predictor` - Predictor functionality tests
-- `graph` - Inference graph tests
-- `path_based_routing` - Path-based routing tests
+| Marker | Kind | OpenShift | Description |
+|--------|:----:|:---------:|-------------|
+| `predictor` | Yes | Yes | Predictor functionality |
+| `graph` | Yes | Yes | Inference graphs |
+| `path_based_routing` | Yes | Yes | Path-based routing |
+| `kserve_on_openshift` | No | Yes | OpenShift-specific |

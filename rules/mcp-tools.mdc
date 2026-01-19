@@ -10,3 +10,5 @@ Use these tools for cross-repository workflows:
 - **JIRA MCP**: Search RHOAIENG issues, get issue details, find related work
 - **GitHub MCP**: Search PRs/issues across forks, get commit details, compare branches
 - **Slack MCP**: Search for discussions about issues/PRs
+- `mcp_ignition-mcp_task_*` These are repository-specific tools for workflow automation, and should be preferred over generic tool calls.
+- `mcp_ignition-mcp_launch_*` These are repository-specific tools for launching tests. They start a debugger - debugging features can be used or ignored. Prefer running tests with these over generic tool calls.

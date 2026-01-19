@@ -1,0 +1,117 @@
+---
+alwaysApply: true
+---
+
+# Test-Driven Development (TDD) Workflow
+
+TDD is the preferred approach for bug fixes and feature development. Write tests first, then implement.
+
+## Core Principle
+
+**Red -> Green -> Refactor**
+
+1. Write a failing test that reproduces the bug or validates the feature
+2. Implement the minimal fix/feature to make the test pass
+3. Clean up while keeping tests green
+
+## TDD Steps
+
+### Step 1: Find or Create Reproducing Test
+
+Before writing any production code, establish a test that:
+- For bugs: Reproduces the failure condition
+- For features: Validates the expected behavior
+
+Search for existing tests first:
+- E2E tests: `test/e2e/`
+- Controller tests: `pkg/controller/**/*_test.go`
+- Webhook tests: `pkg/webhook/**/*_test.go`
+- API tests: `pkg/apis/**/*_test.go`
+
+### Step 2: Run Test (Expect RED)
+
+Run the test and confirm it fails with the expected error. This proves:
+- The test correctly captures the bug/requirement
+- The fix will be verifiable
+
+### Step 3: Implement Fix
+
+Make the minimal changes needed to pass the test. Don't over-engineer.
+
+### Step 4: Run Test (Expect GREEN)
+
+Same test command - should now pass.
+
+### Step 5: Regression Check
+
+Run related tests to ensure no regressions were introduced.
+
+## Todo Structure for TDD
+
+When creating plans or todo lists, use this order:
+
+```yaml
+todos:
+  - id: write-test
+    content: "Create/find reproducing test: {test_path}"
+  - id: run-test-red
+    content: "Run test - expect FAILURE to confirm bug"
+  - id: implement-fix
+    content: "Implement fix in {file_list}"
+  - id: run-test-green
+    content: "Rerun test - expect PASS"
+  - id: regression-check
+    content: "Run related tests for regressions"
+  - id: create-pr
+    content: "Create PR to {remote}/{branch}"
+```
+
+**Key:** `write-test` comes FIRST, not last.
+
+## Plan Mode Integration
+
+When creating implementation plans, include a TDD Workflow section:
+
+```markdown
+## TDD Workflow
+
+### Step 1: Find/Create Reproducing Test
+
+{Existing test path OR describe new test to create}
+
+### Step 2: Run Test (Expect RED)
+
+```bash
+{test command}
+```
+
+Expected: Test FAILS with {error description}
+
+### Step 3: Implement Fix
+
+Files to modify:
+- `{path/to/file1.go}`
+- `{path/to/file2.go}`
+
+Approach:
+- {What the fix will do}
+
+### Step 4: Run Test (Expect GREEN)
+
+Same command as Step 2 - should now PASS.
+
+### Step 5: Regression Check
+
+```bash
+{command to run related tests}
+```
+```
+
+## Anti-Patterns
+
+| Wrong | Right |
+|-------|-------|
+| Write fix, then add tests | Write test first, then fix |
+| Todo: "add-tests" at the end | Todo: "write-test" FIRST |
+| Skip failing test confirmation | Always verify RED before implementing |
+| Large batch of changes without running tests | Small incremental changes with frequent test runs |

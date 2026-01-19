@@ -1,0 +1,94 @@
+---
+description: Fork-to-environment mapping and MCP tools for cluster provisioning
+alwaysApply: false
+---
+
+# Development Environments
+
+Choose the execution environment based on which fork you're working on.
+
+## Fork to Environment Mapping
+
+| Fork | Environment | Cluster Type | Notes |
+|------|-------------|--------------|-------|
+| Upstream (kserve/kserve) | Kind | Kubernetes | Vanilla K8s with Istio/Knative |
+| ODH (opendatahub-io/kserve) | CRC | OpenShift | ODH operator installed |
+| Downstream (red-hat-data-services/kserve) | CRC | OpenShift | RHOAI operator installed |
+
+**Kind and CRC cannot run simultaneously.** Stop one before starting the other.
+
+## Environment Setup by Fork
+
+### Upstream (kserve/kserve) -> Kind
+
+Use Kind for upstream work. This is vanilla Kubernetes without OpenShift-specific features.
+
+**MCP Tools (in order):**
+
+1. `mcp_ignition-mcp_task_kind_refresh` - Create/refresh Kind cluster
+2. `mcp_ignition-mcp_task_install_kserve_dependencies` - Install cert-manager, Istio, Knative
+3. `mcp_ignition-mcp_task_install_network_dependencies` - Install network layer (Istio/Gateway API)
+4. `mcp_ignition-mcp_task_clean_deploy_kserve` - Deploy KServe controller
+5. `mcp_ignition-mcp_task_patch_deployment_mode` - Set Serverless/RawDeployment mode
+
+**For E2E testing:**
+- `mcp_ignition-mcp_task_setup_e2e_port_forward_kind` - Port forward and run tests
+- `mcp_ignition-mcp_task_recreate_e2e_ns_upstream` - Recreate kserve-test namespace
+
+**Launch configurations:** Use `(Kind)` variants in VS Code/Cursor.
+
+### ODH/Downstream -> CRC (OpenShift)
+
+Use CRC for ODH or downstream work. Required for OpenShift-specific features.
+
+**MCP Tools (in order):**
+
+1. `mcp_ignition-mcp_task_crc_refresh` - Start/refresh CRC cluster
+2. `mcp_ignition-mcp_task_pull_secret` - Apply Red Hat pull secret
+3. `mcp_ignition-mcp_task_install_odh_rhoai_operator` - Install ODH or RHOAI operator
+4. `mcp_ignition-mcp_task_apply_dsci_dsc` - Apply DSCInitialization and DataScienceCluster
+
+**For E2E testing:**
+- `mcp_ignition-mcp_task_setup_e2e` - Full E2E environment setup
+- `mcp_ignition-mcp_task_recreate_e2e_ns` - Recreate test namespace
+
+**Launch configurations:** Use non-Kind variants (e.g., "E2E Test (Custom)").
+
+## Feature Availability by Environment
+
+| Feature | Kind | CRC |
+|---------|:----:|:---:|
+| RawDeployment mode | Yes | Yes |
+| Serverless mode | Yes | Yes |
+| OpenShift Routes | No | Yes |
+| ServiceMesh (Maistra) | No | Yes |
+| ODH Dashboard | No | Yes |
+| `kserve_on_openshift` tests | No | Yes |
+
+## Switching Environments
+
+To switch from Kind to CRC:
+```bash
+# Stop Kind cluster
+kind delete cluster
+
+# Start CRC
+crc start
+```
+
+To switch from CRC to Kind:
+```bash
+# Stop CRC
+crc stop
+
+# Create Kind cluster
+mcp_ignition-mcp_task_kind_refresh
+```
+
+## Running Local Code
+
+To run the code with local changes, start a devspace session. This will also provide a debugger for the code:
+
+1. Ensure cluster is running (Kind or CRC)
+2. `mcp_ignition-mcp_task_devspace_dev` - Start devspace dev session
+3. `mcp_ignition-mcp_launch_devspace` - Attach debugger
