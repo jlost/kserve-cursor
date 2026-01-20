@@ -1,8 +1,7 @@
 ---
 description: Git workflow including worktrees and commit signing
-alwaysApply: true
+alwaysApply: false
 ---
-
 # Git Workflow
 
 ## Commit Signing Requirements
@@ -115,36 +114,3 @@ git reset --hard upstream/master
 # Apply stashed changes
 git stash pop
 ```
-
-**Create a handoff prompt** with full context for the new agent session. Write the prompt to `.agent-prompt` in the worktree before running setup:
-
-```bash
-# Create handoff prompt with full context
-cat > ../kserve-RHOAIENG-1234/.agent-prompt <<'EOF'
-Context:
-- JIRA: RHOAIENG-1234 - Fix stale route cleanup after serverless deletion
-- Target: odh/release-v0.15 (2.25 patch, ODH-specific OpenShift Route handling)
-
-Research findings:
-- Routes in istio-system not cleaned up when Serverless isvc deleted
-- OpenShift Route handling is ODH-specific (not in upstream)
-- No existing fix in any fork
-
-Next steps:
-- Investigate Route cleanup in ingress reconciler
-- Add cross-namespace Route deletion on isvc delete
-- Add e2e test for serverless-to-raw migration
-EOF
-
-# Setup worktree (symlinks .vscode/.cursor, copies prompt to clipboard)
-.vscode/scripts/setup-worktree.sh ../kserve-RHOAIENG-1234 --open
-```
-
-The `.agent-prompt` file is copied to clipboard by `setup-worktree.sh` so you can paste it into the new Cursor window.
-
-**Include in the handoff prompt:**
-- JIRA key and summary
-- Target fork/branch with rationale
-- Key research findings (linked PRs, root cause hypothesis)
-- Concrete next steps for implementation
-

@@ -1,0 +1,8 @@
+---
+description: Running Go unit tests
+alwaysApply: false
+---
+
+Always prefer the MCP tools to run unit tests:
+* `mcp_ignition-mcp_launch_unit_test_ginkgo_focus` for Ginkgo tests.
+* `mcp_ignition-mcp_launch_unit_test_name` for non-Ginkgo tests.

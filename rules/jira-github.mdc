@@ -1,16 +1,31 @@
 ---
 description: JIRA integration, PR creation, and cross-repository GitHub reference handling
-alwaysApply: true
+alwaysApply: false
 ---
-
 # JIRA and GitHub Integration
 
 ## JIRA Integration
 
 - Primary project key: **RHOAIENG**
+- Component: **Model Serving** (always set this when creating issues)
 - When searching for issues, use RHOAIENG as the default project
 - Issues may reference commits/PRs across all three forks
 - Always check if a JIRA has existing PRs in any fork before starting work
+
+### JIRA Markup (Not Markdown)
+
+JIRA does NOT support Markdown. Use JIRA wiki markup instead:
+
+| Element | Markdown | JIRA Markup |
+|---------|----------|-------------|
+| Bold | `**text**` | `*text*` |
+| Italic | `_text_` | `_text_` |
+| Code inline | `` `code` `` | `{{code}}` |
+| Code block | ` ```lang ``` ` | `{code:lang}...{code}` |
+| Link | `[text](url)` | `[text\|url]` |
+| Bullet list | `- item` | `* item` |
+| Numbered list | `1. item` | `# item` |
+| Heading | `## Heading` | `h2. Heading` |
 
 ### Fetching JIRA Context
 
