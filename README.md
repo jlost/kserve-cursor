@@ -26,6 +26,8 @@ AI agent rules and commands for developing KServe on OpenShift. Companion to [ks
     export GITHUB_MCP_TOKEN="ghp_xxxx"
     export JIRA_URL="https://issues.redhat.com"
     export JIRA_PERSONAL_TOKEN="your-token"
+    # Slack integration (extract from browser cookies)
+    # See: https://github.com/maorfr/slack-token-extractor
     export SLACK_XOXC_TOKEN="xoxc-xxxx"
     export SLACK_XOXD_TOKEN="xoxd-xxxx"
     ```
