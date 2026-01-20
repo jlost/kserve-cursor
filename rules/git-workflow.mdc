@@ -1,6 +1,5 @@
 ---
-description: Git workflow including worktrees and commit signing
-alwaysApply: false
+alwaysApply: true
 ---
 # Git Workflow
 
@@ -58,46 +57,6 @@ For security fixes, reference the CVE directly in the subject:
 ```
 CVE-2024-43598: Update lightgbm version to 4.6.0 (#4799)
 ```
-
-### Multi-Author Commits
-
-When multiple contributors are involved, add Co-authored-by trailers:
-```
-Signed-off-by: Primary Author <primary@example.com>
-Co-authored-by: Other Contributor <other@example.com>
-```
-
-## Git Worktrees
-
-**Always use worktrees for tasks.** Keep the main repo clean (fetch-only).
-
-**Worktrees are for tasks, not branches.** If the target fork/branch was wrong, rebase the worktree in-place rather than creating a new worktree. The task hasn't changed, just the base.
-
-**Run worktree commands automatically.** Don't just present commands - execute them directly using terminal tools. Run setup script and open in Cursor after creation.
-
-**Always run setup and open worktrees in Cursor after creation.** Run the setup script from the main repo to symlink `.vscode` and `.cursor`, then open in Cursor.
-
-```bash
-# From main repo
-cd ~/projects/kserve
-git fetch --all
-git worktree add ../kserve-RHOAIENG-1234 -b RHOAIENG-1234/fix odh/release-v0.15
-
-# Setup worktree (symlinks .vscode/.cursor from main repo)
-.vscode/scripts/setup-worktree.sh ../kserve-RHOAIENG-1234
-
-# Open in Cursor
-cursor ../kserve-RHOAIENG-1234
-
-# Optional: setup Python venv (in the new Cursor window)
-.vscode/scripts/setup-dev-env.sh
-
-# After PR merges, cleanup
-cd ~/projects/kserve
-git worktree remove ../kserve-RHOAIENG-1234
-```
-
-**Note:** If git remotes are not configured, run `.cursor/scripts/setup-git-remotes.sh` first (see fork-structure rules).
 
 ### Changing the Base Branch In-Place
 
