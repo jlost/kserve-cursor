@@ -1,3 +1,5 @@
+<a href="./kserve-agent.png"><img src="./kserve-agent.png" alt="KServe Agent Demo" width="256" align="right"></a>
+
 # 🤖 KServe Agentic Prompts
 
 AI agent rules and commands for developing KServe on OpenShift. Companion to [kserve-workspace](https://github.com/jlost/kserve-workspace).
