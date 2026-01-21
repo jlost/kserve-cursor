@@ -7,6 +7,11 @@ alwaysApply: false
 
 Choose the execution environment based on which fork you're working on.
 
+**Before setting up an environment, detect the target fork.** See `fork-structure.mdc` for detection rules based on:
+- Branch name patterns (e.g., `RHOAIENG-*-odh-*` -> ODH)
+- Git tracking branch (e.g., tracking `upstream/*` -> Upstream)
+- JIRA ticket prefix (e.g., `RHOAIENG-*` -> ODH/Downstream, never upstream)
+
 ## Fork to Environment Mapping
 
 | Fork | Environment | Cluster Type | Notes |

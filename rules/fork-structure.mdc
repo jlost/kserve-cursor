@@ -3,44 +3,68 @@ description: Repository-specific fork details
 alwaysApply: true
 ---
 
-# Repository: odh-model-controller
+# Repository: kserve
 
 ## Fork Details
 
-| Fork | Repository |
-|------|------------|
-| Upstream | (none - ODH-native) |
-| ODH | opendatahub-io/odh-model-controller |
-| Downstream | red-hat-data-services/odh-model-controller |
+| Fork | Repository | Remote Name |
+|------|------------|-------------|
+| Upstream | kserve/kserve | `upstream` |
+| ODH | opendatahub-io/kserve | `odh` |
+| Downstream | red-hat-data-services/kserve | `downstream` |
 
 ## ODH Default Branch
 
-`master`
+`release-0.15` (tracks upstream releases)
 
 ## Reference Documentation
 
-- ODH contribution guide: `CONTRIBUTING.md`
+- Upstream contribution guide: `CONTRIBUTING.md`
+- ODH docs: `docs/odh/`
 
 ---
 
-# ODH Fork Structure
+# Detecting Target Fork
 
-This project follows a two-tier fork hierarchy (no upstream). Always consider this context when assisting with development tasks.
+Before suggesting an environment or base branch, determine the target fork.
 
-## Fork Hierarchy
+| Signal | Pattern | Target | Env |
+|--------|---------|--------|-----|
+| Branch | `RHOAIENG-*-odh-*` | ODH | CRC |
+| Branch | `RHOAIENG-*` (no suffix) | Downstream | CRC |
+| Branch | `rhoai-*`, `*-odh`, `odh-*` | ODH/Downstream | CRC |
+| Branch | `master` | Upstream | Kind |
+| Tracking | `upstream/*` | Upstream | Kind |
+| Tracking | `odh/*` or `downstream/*` | ODH/Downstream | CRC |
+| JIRA | `RHOAIENG-*` | ODH or Downstream | CRC |
+| JIRA | `KSERVE-*` | Upstream | Kind |
+
+Check tracking: `git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null`
+
+If ambiguous, ask: "Which fork? (upstream/odh/downstream)"
+
+---
+
+# Fork Hierarchy
+
+This project follows a three-tier fork hierarchy. Always consider this context when assisting with development tasks.
 
 ```
-opendatahub-io/odh-model-controller (ODH - origin)
+kserve/kserve (upstream)
     |
     v
-red-hat-data-services/odh-model-controller (downstream/RHODS)
+opendatahub-io/kserve (ODH)
+    |
+    v
+red-hat-data-services/kserve (downstream/RHOAI)
 ```
 
 ## Git Remote Naming Convention
 
 When working with git commands or analyzing branches, expect these remote names:
-- `odh` -> opendatahub-io/odh-model-controller
-- `downstream` -> red-hat-data-services/odh-model-controller
+- `upstream` -> kserve/kserve
+- `odh` -> opendatahub-io/kserve
+- `downstream` -> red-hat-data-services/kserve
 - `origin` -> user's personal fork
 
 ## Branch Targeting Rules
@@ -49,33 +73,33 @@ When determining which branch to base work on:
 
 | Change Type | Target Fork | Base Branch |
 |-------------|-------------|-------------|
-| ODH feature (latest) | odh | `master` |
-| ODH feature (older) | odh | `release-vX.Y` or `stable-X.x` |
+| Upstream feature/fix | upstream | `master` |
+| ODH feature (latest) | odh | `release-0.15` or current release |
+| ODH feature (older) | odh | `release-0.14`, etc. |
 | Downstream-only change (latest) | downstream | `main` |
 | Downstream-only change (older) | downstream | `rhoai-X.Y` |
-| Backport from downstream | odh | `master` |
 
 ### Branch Mapping Between Forks
 
-ODH and downstream branches correspond to specific RHOAI product versions:
-
-| RHOAI Version | ODH Branch | Downstream Branch |
-|---------------|------------|-------------------|
-| 3.x (latest)  | `master`   | `main`            |
-| 2.x (stable)  | `stable-2.x` or `release-vX.Y` | `rhoai-2.Y` |
+| RHOAI Version | Upstream Branch | ODH Branch | Downstream Branch |
+|---------------|-----------------|------------|-------------------|
+| 3.x (latest)  | `master` | `release-0.15` | `main` |
+| 2.x (stable)  | N/A | `release-0.14` | `rhoai-2.Y` |
 
 ### Cherry-Pick Flow
 
-**Always go through ODH first.** Changes flow: ODH -> downstream.
+**Changes flow: Upstream -> ODH -> Downstream**
 
-To get a fix into a specific RHOAI version:
-1. First merge to the corresponding ODH branch (e.g., `odh/stable-2.x` for RHOAI 2.25)
-2. Then cherry-pick to the corresponding downstream branch (e.g., `downstream/rhoai-2.25`)
+To get a fix into RHOAI:
+1. If applicable, first merge to upstream (`kserve/kserve`)
+2. Cherry-pick to ODH (`opendatahub-io/kserve`)
+3. Cherry-pick to downstream (`red-hat-data-services/kserve`)
 
-**Never target downstream directly** without first having the change in ODH.
+For ODH-specific changes (OpenShift integration, etc.), start at ODH.
 
 ## Code Sync Patterns
 
 When syncing code between forks:
-1. ODH release branches are cut from `master`
-2. Cherry-picks flow: ODH -> downstream (always ODH first)
+1. Upstream releases trigger ODH release branch updates
+2. ODH release branches sync to downstream
+3. Cherry-picks flow: Upstream -> ODH -> Downstream
