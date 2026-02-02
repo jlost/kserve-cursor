@@ -19,9 +19,9 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/) format for u
 <type>: <description> (#PR)
 
 <optional body>
-
-Signed-off-by: Your Name <email@example.com>
 ```
+
+**Do not include a Signed-off-by line in the commit message.** It will be added by the `-s` flag.
 
 ### Type Prefixes
 

@@ -1,162 +1,242 @@
 # JIRA Work
 
-Create a git worktree and start working on a JIRA issue.
+Start working on a JIRA issue in the current worktree. This is the entry point for a new Cursor session created by `setup-worktree.sh`.
+
+## Prerequisites
+
+This command assumes:
+- You're in a git worktree created by `setup-worktree.sh`
+- The worktree has a branch tracking the appropriate base (can be corrected if wrong)
 
 ## Instructions
 
-Given a JIRA key (e.g., RHOAIENG-1234), set up a development environment:
+Given a JIRA key (e.g., RHOAIENG-1234), execute the full development workflow:
 
-### Phase 1: Research (uses `/jira-research`)
+### Phase 1: Research
 
-Run the research workflow from `/jira-research`:
-- Fetch JIRA details and extract context
-- Deep search for existing work across all forks
-- Get recommendation on whether to proceed
+Read and follow the research workflow in `.cursor/commands/jira-research.md`:
 
-**If research recommends "needs more information"**, stop and help the user gather that information before proceeding.
+1. **Fetch JIRA details** using JIRA MCP:
+   - Get issue with `fields: *all` and `expand: changelog`
+   - Fetch comments separately (not included in `*all`)
+   - Extract key terms: error messages, function names, component names
 
-**If research recommends "duplicate"**, confirm with user before proceeding.
+2. **Deep search GitHub** across all forks using GitHub MCP:
+   - Search by JIRA key in PRs, issues, commits
+   - Search by keywords/error messages from JIRA
+   - Check all three forks: `kserve/kserve`, `opendatahub-io/kserve`, `red-hat-data-services/kserve`
 
-#### Reproduction Strategy
+3. **Search Slack** for relevant discussions (if appropriate)
 
-After initial research, determine how to reproduce the issue:
+4. **Compile findings** and determine recommendation
 
-1. **Find or create a failing test**
-   - Search `test/e2e/` for existing tests covering the affected functionality
-   - Search `pkg/` for unit tests (`*_test.go`) near the affected code
-   - If no test exists, plan to create one that demonstrates the bug
+**Based on research recommendation:**
+- **"needs more information"**: Stop and help gather missing details before proceeding
+- **"duplicate"**: Confirm with user before proceeding
+- **"cherry-pick needed"**: Adjust workflow to cherry-pick instead of new implementation
+- **"ready to proceed"**: Continue to Phase 2
 
-2. **Determine environment requirements**
-   - **Unit tests**: Can run in isolation (`go test ./pkg/...`)
-   - **E2E tests**: Require cluster setup - see `.vscode/workflow.md`
-     - KIND/upstream: Standard Kubernetes testing
-     - OpenShift/CRC: ODH/RHOAI-specific features, routes, ServiceMesh
-   - Note which markers apply (e.g., `predictor`, `raw`, `kserve_on_openshift`)
+### Phase 2: Validate Target Branch
 
-3. **Plan the workflow** for the handoff prompt:
-   - Step 1: Set up environment (if e2e needed)
-   - Step 2: Run test to confirm it fails (reproduce the issue)
-   - Step 3: Implement the fix
-   - Step 4: Rerun test to verify fix
-
-### Phase 2: Determine Target
-
-If not provided via target override, apply branch targeting rules:
-
-| Scenario | Target Fork | Base Branch | Remote |
-|----------|-------------|-------------|--------|
-| General KServe bug/feature | kserve/kserve | `master` | `upstream` |
-| OpenShift-specific change | opendatahub-io/kserve | `master` | `odh` |
-| Release-targeted fix (e.g., "ODH-3.2") | opendatahub-io/kserve | `release-vX.Y` | `odh` |
-| RHODS-only configuration | red-hat-data-services/kserve | `main` | `downstream` |
-| Cherry-pick needed | Use source fork's target | Appropriate branch | Per fork |
-
-**Present recommendation to user** and wait for confirmation.
-
-### Phase 3: Create Worktree
-
-Once target is confirmed, generate commands for the user.
-
-Important: do NOT try to pass a multi-line "handoff prompt" via a CLI arg. Instead, create a prompt file in the new worktree and point `setup-worktree.sh` at it with `--prompt-file`.
+Check if the current worktree branch is based on the correct upstream:
 
 ```bash
-# From main repo
-cd ~/projects/kserve
-git fetch --all
+# Get current branch and its upstream
+git rev-parse --abbrev-ref HEAD
+git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null || echo "no upstream"
 
-# Create worktree
-git worktree add ../kserve-JIRA_KEY -b JIRA_KEY/description REMOTE/BRANCH
-
-# Create handoff prompt for new agent session
-cat > ../kserve-JIRA_KEY/.agent-prompt <<'EOF'
-Context:
-- JIRA: JIRA_KEY - <paste summary here>
-- Target: REMOTE/BRANCH (explain why)
-
-Research findings:
-- <bullet list of findings, linked PRs/issues, root cause hypothesis, etc>
-
-Reproduction strategy:
-- Test type: <unit test / e2e test / new test needed>
-- Existing test: <path to test file, or "none - create new">
-- Environment: <none (unit) / KIND / OpenShift CRC>
-- E2E markers: <predictor, raw, kserve_on_openshift, etc. if applicable>
-- Setup reference: .vscode/workflow.md
-
-Workflow:
-1. <Set up environment if needed - reference specific workflow.md section>
-2. <Run test to reproduce: specific pytest/go test command>
-3. <Implement fix: files to modify, approach>
-4. <Rerun test to verify: same command as step 2>
-EOF
-
-# Setup worktree and open in Cursor (symlinks .vscode/.cursor, copies prompt to clipboard)
-.vscode/scripts/setup-worktree.sh ../kserve-JIRA_KEY --open
+# Check which remote/branch this was based on
+git log --oneline -1 $(git merge-base HEAD odh/release-0.15 2>/dev/null || echo HEAD)
+git log --oneline -1 $(git merge-base HEAD upstream/master 2>/dev/null || echo HEAD)
 ```
 
-Where:
-- `JIRA_KEY` = the JIRA issue key (e.g., RHOAIENG-1234)
-- `description` = short kebab-case description from JIRA summary (e.g., `fix-nil-transformer`)
-- `REMOTE/BRANCH` = the determined base (e.g., `odh/release-v0.15`)
+Apply branch targeting rules from `fork-structure.mdc`:
 
-**Stop after generating the commands.** Do not continue implementing changes in this window - work continues in the new Cursor window.
+| Scenario | Target Fork | Base Branch |
+|----------|-------------|-------------|
+| General KServe bug/feature | upstream | `master` |
+| OpenShift-specific change | odh | `release-0.15` |
+| ODH release fix | odh | `release-0.15` |
+| Downstream-only change (rare) | downstream | `main` |
+
+**If current base doesn't match recommendation:**
+- Present the mismatch to user
+- Offer to rebase: `git fetch <remote> && git rebase <remote>/<branch>`
+- Or continue with current base if user confirms
+
+### Phase 3: Environment Setup
+
+Read and follow the dev-environments skill: `.cursor/skills/dev-environments/SKILL.md`
+
+**Determine environment needed:**
+
+| Target Fork | Environment | Setup |
+|-------------|-------------|-------|
+| upstream | Kind cluster | Kind setup flow |
+| odh | CRC (OpenShift) | CRC setup flow |
+| downstream | CRC (OpenShift) | CRC setup flow |
+
+**Check current environment state:**
+1. Is Kind running? (`kind get clusters`)
+2. Is CRC running? (`crc status`)
+3. Is the right environment for the target already running?
+
+**If environment switch needed:**
+- Stop the current environment first (Kind and CRC cannot coexist)
+- Set up the correct environment using MCP tools
+
+**Environment MCP tools:**
+
+For Kind (upstream):
+```
+mcp_ignition-mcp_task_kind_refresh
+mcp_ignition-mcp_task_install_kserve_dependencies
+mcp_ignition-mcp_task_install_network_dependencies
+mcp_ignition-mcp_task_clean_deploy_kserve
+mcp_ignition-mcp_task_patch_deployment_mode
+```
+
+For CRC (ODH/downstream):
+```
+mcp_ignition-mcp_task_crc_refresh
+mcp_ignition-mcp_task_pull_secret
+mcp_ignition-mcp_task_setup_e2e  # for E2E parity
+mcp_ignition-mcp_task_recreate_e2e_ns
+```
+
+**After environment is ready:**
+- Start devspace for local code deployment: `mcp_ignition-mcp_launch_devspace`
+
+### Phase 4: Test Discovery and Reproduction (TDD)
+
+Follow the TDD workflow from `tdd-workflow.mdc`:
+
+**Find existing tests:**
+- E2E tests: `test/e2e/` - Python pytest with markers
+- Controller tests: `pkg/controller/**/*_test.go`
+- Webhook tests: `pkg/webhook/**/*_test.go`
+- API tests: `pkg/apis/**/*_test.go`
+
+Search strategies:
+- Feature/component name in test file names
+- Error messages or conditions from JIRA
+- Related InferenceService configurations in test fixtures
+
+**If no existing test covers the issue:**
+- Plan to create a new test that demonstrates the bug/validates the feature
+
+**Run test to reproduce (expect RED):**
+
+For unit tests (Ginkgo):
+```
+mcp_ignition-mcp_launch_unit_test_ginkgo_focus
+```
+
+For unit tests (non-Ginkgo):
+```
+mcp_ignition-mcp_launch_unit_test_name
+```
+
+For E2E tests:
+```
+mcp_ignition-mcp_launch_e2e_test_kind  # upstream
+mcp_ignition-mcp_launch_e2e_test_odh_rhoai  # ODH/downstream
+```
+
+**Confirm the test fails** with the expected error before proceeding to implementation.
+
+### Phase 5: Implementation
+
+Implement the fix with minimal changes needed to pass the test.
+
+**Guidelines:**
+- Focus on the root cause identified in research
+- Keep changes scoped to the issue
+- Follow existing code patterns
+
+### Phase 6: Verification
+
+**Run test again (expect GREEN):**
+- Same test command as Phase 4
+- Confirm the fix resolves the issue
+
+**Run related tests for regression check:**
+- Unit tests in the same package
+- E2E tests with related markers
+
+### Phase 7: PR Creation
+
+Follow the jira-github-workflow skill: `.cursor/skills/jira-github-workflow/SKILL.md`
+
+**Before creating PR:**
+- Ensure commits are signed: `git commit -s -S`
+- Follow conventional commit format
+- Check for linter errors: run `make lint` or equivalent
+
+**Create PR:**
+- Always create as **draft** first
+- Include JIRA key in title for ODH/downstream PRs: `[RHOAIENG-1234] Fix description`
+- Do NOT include JIRA key in upstream PR titles
+- Use PR template from `.github/PULL_REQUEST_TEMPLATE.md`
+
+**Link JIRA:**
+- For ODH/downstream: DPTP bot auto-links from PR title
+- For upstream: Manually add PR URL to JIRA's "Git Pull Request" field
 
 ## User Input
 
 JIRA Key: {{jira_key}}
 
-Target override (optional): {{target}} (e.g., "upstream/master", "odh/release-v0.15")
-
-Skip research (optional): {{skip_research}} (use if already researched)
+Options:
+- `skip_research:true` - Skip Phase 1 if already researched
+- `target:<remote>/<branch>` - Override target determination
+- `skip_env:true` - Skip environment setup (already running)
 
 ## Example Usage
 
-**Full workflow:**
+**Full workflow (start of new session):**
 ```
 /jira-work RHOAIENG-1234
 ```
 
-**With target override (skip target determination):**
+**Skip research (already done in previous session):**
 ```
-/jira-work RHOAIENG-1234 target:odh/release-v0.15
-```
-
-**Skip research (already done):**
-```
-/jira-work RHOAIENG-1234 skip_research:true target:upstream/master
+/jira-work RHOAIENG-1234 skip_research:true
 ```
 
-Expected flow:
-1. Run `/jira-research` workflow (unless skipped)
-2. Review research findings and recommendation
-3. **Determine reproduction strategy** (test type, environment, existing tests)
-4. Determine or confirm target fork/branch
-5. Generate worktree commands with `.agent-prompt` containing full context
-6. User runs commands to create worktree and open in Cursor
+**Override target:**
+```
+/jira-work RHOAIENG-1234 target:upstream/master
+```
 
-## Notes
+**Skip environment (already set up):**
+```
+/jira-work RHOAIENG-1234 skip_env:true
+```
 
-- The `.agent-prompt` file contains full context for the new agent session (copied to clipboard)
-- If research was already done, use `skip_research:true` to jump to worktree creation
-- **Test-first workflow**: The handoff prompt should guide the new session to reproduce the issue BEFORE implementing a fix
+## Typical Session Flow
 
-### Test Discovery Tips
-
-When searching for existing tests:
-- E2E tests: `test/e2e/` - Python pytest tests with markers
-- Controller tests: `pkg/controller/**/*_test.go`
-- Webhook tests: `pkg/webhook/**/*_test.go`
-- API tests: `pkg/apis/**/*_test.go`
-
-Common test patterns to search for:
-- Feature name in test file names
-- Related InferenceService configurations in `test/e2e/` JSON fixtures
-- Error messages or conditions mentioned in the JIRA
+1. `setup-worktree.sh --jira RHOAIENG-1234` creates worktree and opens Cursor
+2. User pastes `/jira-work RHOAIENG-1234` from clipboard
+3. Agent researches JIRA and validates branch target
+4. Agent sets up environment (Kind or CRC as appropriate)
+5. Agent finds/creates test and confirms it reproduces the issue
+6. Agent implements the fix
+7. Agent verifies fix with tests
+8. Agent creates draft PR (after user approval)
 
 ## Related Commands
 
-- `/jira-research` - Research only, no worktree creation
-- `/jira` - Quick context fetch (if you need to refresh JIRA details later)
+These are standalone commands for specific tasks (not called by this command):
+- `/jira-research` - Research only, no implementation (use when you just want to investigate)
+- `/jira` - Quick JIRA context fetch
 - `/pr-target` - Determine PR target for existing changes
-- `/spinoff-pr` - Spin off unrelated changes to a separate PR
+- `/e2e-debug` - Debug failing E2E tests
+- `/cherrypick-check` - Check cherry-pick status across forks
 
+## Notes
+
+- This command assumes the worktree already exists (created by `setup-worktree.sh`)
+- Environment setup may take several minutes for first-time setup
+- Always confirm test reproduction before implementing a fix (TDD workflow)
+- Get user approval before creating PRs or posting JIRA comments
