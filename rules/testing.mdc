@@ -1,0 +1,19 @@
+---
+alwaysApply: true
+---
+# Unit Testing
+Always prefer the MCP tools to run unit tests:
+* `mcp_ignition-mcp_launch_unit_test_ginkgo_focus` for Ginkgo tests.
+* `mcp_ignition-mcp_launch_unit_test_name` for non-Ginkgo tests.
+
+# E2E Testing
+Always prefer the MCP tools to run E2E tests:
+* `mcp_ignition-mcp_launch_e2e_test_odh_rhoai` for E2E tests.
+
+## Upstream (kserve)
+Utilizes Github Actions from .github/workflows/e2e-test.yml 
+
+## Downstream (odh-rhoai)
+Utilizes Openshift CI operator from 
+https://github.com/openshift/release/tree/master/ci-operator/config/opendatahub-io/kserve
+Specific configuration (master): https://github.com/openshift/release/blob/master/ci-operator/config/opendatahub-io/kserve/opendatahub-io-kserve-master.yaml
