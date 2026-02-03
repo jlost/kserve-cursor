@@ -36,7 +36,9 @@ Before suggesting an environment or base branch, determine the target fork.
 | Branch | `master` | Upstream | Kind |
 | Tracking | `upstream/*` | Upstream | Kind |
 | Tracking | `odh/*` or `downstream/*` | ODH/Downstream | CRC |
-| JIRA | `RHOAIENG-*` | ODH or Downstream | CRC |
+| JIRA | `RHOAIENG-*` + rhoai-2.16/2.19/2.22 | Downstream direct | CRC |
+| JIRA | `RHOAIENG-*` + rhoai-2.25 | ODH stable-2.x or Downstream | CRC |
+| JIRA | `RHOAIENG-*` (generic) | ODH or Downstream | CRC |
 | JIRA | `KSERVE-*` | Upstream | Kind |
 
 Check tracking: `git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null`
@@ -84,7 +86,22 @@ When determining which branch to base work on:
 | RHOAI Version | Upstream Branch | ODH Branch | Downstream Branch |
 |---------------|-----------------|------------|-------------------|
 | 3.x (latest)  | `master` | `release-0.15` | `main` |
-| 2.x (stable)  | N/A | `release-0.14` | `rhoai-2.Y` |
+| 2.25 (latest stable) | N/A | `stable-2.x` | `rhoai-2.25` |
+| 2.16, 2.19, 2.22 (older EUS/stable) | N/A | N/A | `rhoai-2.Y` (direct) |
+
+### ODH stable-2.x Sync Pattern
+
+The ODH `stable-2.x` branch only feeds into the **latest** RHOAI 2.x release:
+
+- **RHOAI 2.25**: Can use `stable-2.x` sync via devops CI actions
+- **Older z-streams (2.16, 2.19, 2.22)**: Require direct PRs to `rhoai-2.Y` in downstream
+
+For older RHOAI versions, there is no ODH intermediate branch - fixes go directly to the
+downstream `red-hat-data-services/*` repository targeting the specific `rhoai-2.Y` branch.
+
+Example workflow for RHOAI 2.16 CVE fix:
+1. PR directly to `red-hat-data-services/odh-model-controller` branch `rhoai-2.16`
+2. No ODH cherry-pick needed (2.16 has diverged from stable-2.x)
 
 ### Cherry-Pick Flow
 
@@ -103,3 +120,21 @@ When syncing code between forks:
 1. Upstream releases trigger ODH release branch updates
 2. ODH release branches sync to downstream
 3. Cherry-picks flow: Upstream -> ODH -> Downstream
+
+### RHOAI 2.x Z-Stream Workflow
+
+Two distinct workflows exist for RHOAI 2.x fixes:
+
+**Latest stable (2.25):**
+- Fixes can flow through ODH `stable-2.x` branch
+- Automated sync via devops CI actions
+
+**Older z-streams (2.16, 2.19, 2.22 EUS):**
+- Direct PRs to downstream `rhoai-2.Y` branches
+- No ODH intermediate step required
+- These branches have diverged from stable-2.x
+
+When targeting a JIRA with "Affects Version" like `rhoai-2.16`:
+1. Target `red-hat-data-services/{repo}` directly
+2. Base branch: `rhoai-2.16`
+3. Skip ODH cherry-pick
