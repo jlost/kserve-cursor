@@ -138,3 +138,10 @@ When targeting a JIRA with "Affects Version" like `rhoai-2.16`:
 1. Target `red-hat-data-services/{repo}` directly
 2. Base branch: `rhoai-2.16`
 3. Skip ODH cherry-pick
+
+## Release / Process Workflows
+
+For the full decision flow (new feature vs CVE, which repo/branch first, code freezes, RHOAI release inclusion, regular sync cadence), use the **model-serving-release-workflow** skill. In short:
+- New feature: contribute upstream (kserve master) when possible; else ODH (kserve master or odh-model-controller incubating).
+- CVE: follow red.ht/modelserving-cve-process.
+- RHOAI release: Internal then Official Code Freeze; if past freeze, report to team and get approval, then cherry-pick/sync or wait for regular sync (ODH Release Process: red.ht/odh-model-process).
