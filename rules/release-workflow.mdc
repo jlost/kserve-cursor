@@ -1,0 +1,10 @@
+---
+description: When to use the model serving release workflow (RHOAI inclusion, code freezes, CVE process)
+alwaysApply: false
+---
+
+# Release Workflow
+
+When the conversation is about **getting a change into a RHOAI release**, **code freezes** (Internal or Official), **CVE process**, or **which repo/branch to use for a new feature** (upstream vs ODH vs odh-model-controller), use the **model-serving-release-workflow** skill.
+
+Read `.cursor/skills/model-serving-release-workflow/SKILL.md` and follow its decision flow and references (red.ht/modelserving-cve-process, red.ht/odh-model-process).
