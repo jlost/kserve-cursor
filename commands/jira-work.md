@@ -95,27 +95,25 @@ Read and follow the dev-environments skill: `.cursor/skills/dev-environments/SKI
 - Stop the current environment first (Kind and CRC cannot coexist)
 - Set up the correct environment using MCP tools
 
-**Environment MCP tools:**
+**Environment setup:**
 
 For Kind (upstream):
-```
-mcp_ignition-mcp_task_kind_refresh
-mcp_ignition-mcp_task_install_kserve_dependencies
-mcp_ignition-mcp_task_install_network_dependencies
-mcp_ignition-mcp_task_clean_deploy_kserve
-mcp_ignition-mcp_task_patch_deployment_mode
+```bash
+hack/setup/dev/manage.kind-with-registry.sh   # create/refresh Kind cluster
+test/scripts/gh-actions/setup-deps.sh          # install kserve + network deps
+make deploy-dev                                # deploy kserve with dev images
 ```
 
 For CRC (ODH/downstream):
-```
-mcp_ignition-mcp_task_crc_refresh
-mcp_ignition-mcp_task_pull_secret
-mcp_ignition-mcp_task_setup_e2e  # for E2E parity
-mcp_ignition-mcp_task_recreate_e2e_ns
+```bash
+crc start                                              # start CRC
+test/scripts/openshift-ci/deploy.odh.sh                # install ODH operator
+test/scripts/openshift-ci/setup-e2e-tests.sh           # E2E parity setup
+test/scripts/openshift-ci/setup-ci-namespace.sh        # create/recreate E2E namespace
 ```
 
 **After environment is ready:**
-- Start devspace for local code deployment: `mcp_ignition-mcp_launch_devspace`
+- Start devspace for local code deployment: `devspace dev`
 
 ### Phase 4: Test Discovery and Reproduction (TDD)
 
@@ -144,20 +142,20 @@ Search strategies:
 
 **Run test to reproduce (expect RED):**
 
-For unit tests (Ginkgo):
-```
-mcp_ignition-mcp_launch_unit_test_ginkgo_focus
-```
+For unit tests:
+```bash
+# Focused by test name (Ginkgo or standard)
+make test TEST_PKGS="./pkg/controller/v1beta1/inferenceservice/..."
 
-For unit tests (non-Ginkgo):
-```
-mcp_ignition-mcp_launch_unit_test_name
+# Or directly with go test
+KUBEBUILDER_ASSETS="$(make setup-envtest 2>&1 | tail -1)" \
+  go test -v -run "TestName" ./pkg/path/to/package/...
 ```
 
 For E2E tests:
-```
-mcp_ignition-mcp_launch_e2e_test_kind  # upstream
-mcp_ignition-mcp_launch_e2e_test_odh_rhoai  # ODH/downstream
+```bash
+test/scripts/gh-actions/run-e2e-tests.sh          # upstream (Kind)
+test/scripts/openshift-ci/run-e2e-tests.sh        # ODH/downstream (CRC)
 ```
 
 **Confirm the test fails** with the expected error before proceeding to implementation.

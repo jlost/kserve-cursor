@@ -24,30 +24,28 @@ Run git commands from within the target repo directory (e.g., `kserve/` or `odh-
 
 ### Upstream -> Kind
 
-```
-1. mcp_ignition-mcp_task_kind_refresh
-2. mcp_ignition-mcp_task_install_kserve_dependencies
-3. mcp_ignition-mcp_task_install_network_dependencies
-4. mcp_ignition-mcp_task_clean_deploy_kserve
-5. mcp_ignition-mcp_task_patch_deployment_mode
+```bash
+hack/setup/dev/manage.kind-with-registry.sh   # 1. Create/refresh Kind cluster
+test/scripts/gh-actions/setup-deps.sh          # 2. Install kserve + network deps
+make deploy-dev                                # 3. Deploy kserve with dev images
 ```
 
-Then: `mcp_ignition-mcp_launch_devspace` for local code
-E2E tests: `mcp_ignition-mcp_launch_e2e_test_kind`
+Then: `devspace dev` for local code
+E2E tests: `test/scripts/gh-actions/run-e2e-tests.sh`
 
 ### ODH/Downstream -> CRC
 
-```
-1. mcp_ignition-mcp_task_crc_refresh
-2. mcp_ignition-mcp_task_pull_secret
+```bash
+crc start                                      # 1. Start/refresh CRC
+# 2. Configure pull secret (via CRC setup or manual oc commands)
 ```
 
 Then choose path:
-- **Operator Path** (production parity): `mcp_ignition-mcp_task_install_odh_rhoai_operator` -> `mcp_ignition-mcp_task_apply_dsci_dsc`
-- **E2E Path** (CI parity): `mcp_ignition-mcp_task_setup_e2e` -> `mcp_ignition-mcp_task_recreate_e2e_ns`
+- **Operator Path** (production parity): `test/scripts/openshift-ci/deploy.odh.sh`
+- **E2E Path** (CI parity): `test/scripts/openshift-ci/setup-e2e-tests.sh` -> `test/scripts/openshift-ci/setup-ci-namespace.sh`
 
-Then: `mcp_ignition-mcp_launch_devspace` for local code
-E2E tests: `mcp_ignition-mcp_launch_e2e_test_odh_rhoai`
+Then: `devspace dev` for local code
+E2E tests: `test/scripts/openshift-ci/run-e2e-tests.sh`
 
 ## Switching Environments
 

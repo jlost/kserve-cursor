@@ -2,13 +2,32 @@
 alwaysApply: true
 ---
 # Unit Testing
-Always prefer the MCP tools to run unit tests:
-* `mcp_ignition-mcp_launch_unit_test_ginkgo_focus` for Ginkgo tests.
-* `mcp_ignition-mcp_launch_unit_test_name` for non-Ginkgo tests.
+
+Run unit tests via the Makefile from the repo root:
+
+```bash
+# All unit tests
+make test
+
+# Focused packages
+make test TEST_PKGS="./pkg/controller/v1beta1/inferenceservice/..."
+
+# Single test by name (Ginkgo or standard)
+KUBEBUILDER_ASSETS="$(make setup-envtest 2>&1 | tail -1)" \
+  go test -v -run "TestReconcile" ./pkg/controller/v1beta1/inferenceservice/...
+```
 
 # E2E Testing
-Always prefer the MCP tools to run E2E tests:
-* `mcp_ignition-mcp_launch_e2e_test_odh_rhoai` for E2E tests.
+
+Run E2E tests using the scripts under `test/scripts/`:
+
+```bash
+# Kind (upstream)
+test/scripts/gh-actions/run-e2e-tests.sh
+
+# ODH / RHOAI (OpenShift CI)
+test/scripts/openshift-ci/run-e2e-tests.sh
+```
 
 ## kserve
 
