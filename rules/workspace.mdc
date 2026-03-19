@@ -1,0 +1,42 @@
+---
+description: Multi-repo workspace layout, repo detection, and git conventions
+alwaysApply: true
+---
+
+# Model Serving Workspace
+
+This workspace contains multiple repositories for the RHOAI Model Serving stack.
+
+## Directory Layout
+
+```
+model-serving/              # Workspace root
+├── .cursor/                # Shared Cursor configuration
+├── kserve/                 # kserve fork hierarchy (three-tier)
+├── odh-model-controller/   # odh-model-controller fork hierarchy (two-tier)
+└── ...
+```
+
+## Detecting the Active Repository
+
+Determine which repo the user is working in from context:
+
+| Signal | Repo |
+|--------|------|
+| Open file under `kserve/` | kserve |
+| Open file under `odh-model-controller/` | odh-model-controller |
+| User mentions "kserve", "isvc", "inferenceservice", "predictor", "transformer", "explainer" | kserve |
+| User mentions "omc", "odh-model-controller", "routes", "authconfig", "authorino", "servicemesh" | odh-model-controller |
+If ambiguous, ask: "Which repo? (kserve / odh-model-controller)"
+
+See `repo-scope.mdc` for detailed responsibility boundaries between the two repos.
+
+## Git Operations
+
+Each subdirectory is an **independent git repository**. Always run git commands from within the target repo directory or use `-C`:
+
+```bash
+git -C kserve status
+git -C odh-model-controller log --oneline -5
+```
+

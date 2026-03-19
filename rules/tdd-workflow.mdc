@@ -22,11 +22,18 @@ Before writing any production code, establish a test that:
 - For bugs: Reproduces the failure condition
 - For features: Validates the expected behavior
 
-Search for existing tests first:
-- E2E tests: `test/e2e/`
-- Controller tests: `pkg/controller/**/*_test.go`
-- Webhook tests: `pkg/webhook/**/*_test.go`
-- API tests: `pkg/apis/**/*_test.go`
+Search for existing tests first. Paths are relative to the repo root (see `workspace.mdc` to detect the active repo):
+
+**kserve:**
+- E2E tests: `kserve/test/e2e/`
+- Controller tests: `kserve/pkg/controller/**/*_test.go`
+- Webhook tests: `kserve/pkg/webhook/**/*_test.go`
+- API tests: `kserve/pkg/apis/**/*_test.go`
+
+**odh-model-controller:**
+- E2E tests: `odh-model-controller/test/e2e/`
+- Controller tests: `odh-model-controller/controllers/*_test.go`
+- Webhook tests: `odh-model-controller/webhooks/*_test.go`
 
 ### Step 2: Run Test (Expect RED)
 

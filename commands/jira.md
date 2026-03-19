@@ -1,6 +1,6 @@
 # JIRA Lookup
 
-Look up a JIRA issue and find related PRs across all KServe forks.
+Look up a JIRA issue and find related PRs across all forks (kserve and odh-model-controller).
 
 ## Instructions
 
@@ -28,9 +28,15 @@ Given a JIRA key (e.g., RHOAIENG-1234), perform the following:
    - Cherry-pick PRs often reference the original PR number from a different fork
 
 4. **Search for related PRs** using GitHub MCP across all forks:
+
+   **kserve:**
    - Search `kserve/kserve` for PRs mentioning the JIRA key
    - Search `opendatahub-io/kserve` for PRs mentioning the JIRA key
    - Search `red-hat-data-services/kserve` for PRs mentioning the JIRA key
+
+   **odh-model-controller:**
+   - Search `opendatahub-io/odh-model-controller` for PRs mentioning the JIRA key
+   - Search `red-hat-data-services/odh-model-controller` for PRs mentioning the JIRA key
 
 5. **Search for related commits** if no PRs found:
    - Search code commits that reference the JIRA key

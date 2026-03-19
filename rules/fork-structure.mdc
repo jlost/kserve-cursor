@@ -1,6 +1,7 @@
 ---
-description: Repository-specific fork details
-alwaysApply: true
+description: kserve three-tier fork hierarchy and branch targeting
+globs: kserve/**
+alwaysApply: false
 ---
 
 # Repository: kserve
@@ -19,8 +20,8 @@ alwaysApply: true
 
 ## Reference Documentation
 
-- Upstream contribution guide: `CONTRIBUTING.md`
-- ODH docs: `docs/odh/`
+- Upstream contribution guide: `kserve/CONTRIBUTING.md`
+- ODH docs: `kserve/docs/odh/`
 
 ---
 
@@ -41,7 +42,7 @@ Before suggesting an environment or base branch, determine the target fork.
 | JIRA | `RHOAIENG-*` (generic) | ODH or Downstream | CRC |
 | JIRA | `KSERVE-*` | Upstream | Kind |
 
-Check tracking: `git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null`
+Check tracking (run from within `kserve/`): `git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null`
 
 If ambiguous, ask: "Which fork? (upstream/odh/downstream)"
 

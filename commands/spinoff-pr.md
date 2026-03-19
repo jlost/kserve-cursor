@@ -19,41 +19,51 @@ Determine what needs to be extracted:
 - Description of work to do
 - Files that will be affected
 
-### Phase 2: Determine Target Fork/Branch
+### Phase 2: Determine Target Repo, Fork, and Branch
 
-If target isn't contextually clear, analyze using `/pr-target` logic:
+First, determine which repo (kserve or odh-model-controller) using `workspace.mdc` and `repo-scope.mdc`.
+
+Then determine the target fork/branch. If target isn't contextually clear, analyze using `/pr-target` logic:
+
+**kserve:**
 
 | Change Type | Target Fork | Base Branch | Remote |
 |-------------|-------------|-------------|--------|
 | General KServe bug/feature | kserve/kserve | `master` | `upstream` |
-| OpenShift/ODH-specific | opendatahub-io/kserve | `master` | `odh` |
+| OpenShift/ODH-specific | opendatahub-io/kserve | `release-v0.17` | `odh` |
 | Release-critical fix | opendatahub-io/kserve | `release-vX.Y` | `odh` |
 | RHODS-only | red-hat-data-services/kserve | `main` | `downstream` |
+
+**odh-model-controller:**
+
+| Change Type | Target Fork | Base Branch | Remote |
+|-------------|-------------|-------------|--------|
+| ODH feature (latest) | opendatahub-io/odh-model-controller | `master` | `odh` |
+| Downstream-only | red-hat-data-services/odh-model-controller | `main` | `downstream` |
 
 **Present recommendation and wait for confirmation.**
 
 ### Phase 3: Create Clean Branch
 
-**From the main repo** (not the current worktree), create a fresh branch:
+From the target repo directory, create a fresh worktree:
 
 ```bash
-# Go to main repo (keeps current worktree untouched)
-cd ~/projects/kserve
+cd REPO_DIR
 
-# Fetch latest
 git fetch REMOTE
 
-# Create new worktree from target's latest main/master
-git worktree add ../kserve-spinoff-DESCRIPTION -b spinoff/DESCRIPTION REMOTE/BRANCH
+git worktree add ../PREFIX-spinoff-DESCRIPTION -b spinoff/DESCRIPTION REMOTE/BRANCH
 
 # Setup worktree
-.vscode/scripts/setup-worktree.sh ../kserve-spinoff-DESCRIPTION
+.vscode/scripts/setup-worktree.sh ../PREFIX-spinoff-DESCRIPTION
 
 # Open in new Cursor window
-cursor ../kserve-spinoff-DESCRIPTION
+cursor ../PREFIX-spinoff-DESCRIPTION
 ```
 
 Where:
+- `REPO_DIR` = `kserve` or `odh-model-controller`
+- `PREFIX` = `kserve` or `omc`
 - `REMOTE` = target remote (upstream, odh, or downstream)
 - `BRANCH` = target base branch (master, main, or release-vX.Y)
 - `DESCRIPTION` = short kebab-case description of the spinoff
@@ -64,19 +74,18 @@ Where:
 
 Option 1 - Cherry-pick commits:
 ```bash
-# In the new worktree
-cd ../kserve-spinoff-DESCRIPTION
+cd ../PREFIX-spinoff-DESCRIPTION
 git cherry-pick COMMIT_SHA1 COMMIT_SHA2 ...
 ```
 
 Option 2 - Apply patches from files:
 ```bash
 # From original worktree, create patch
-cd ~/projects/kserve-ORIGINAL-TASK
+cd ORIGINAL_WORKTREE
 git diff HEAD -- path/to/file1 path/to/file2 > /tmp/spinoff.patch
 
 # In new worktree, apply patch
-cd ../kserve-spinoff-DESCRIPTION
+cd ../PREFIX-spinoff-DESCRIPTION
 git apply /tmp/spinoff.patch
 git add -A
 git commit -s -S -m "type: description"
@@ -84,9 +93,7 @@ git commit -s -S -m "type: description"
 
 Option 3 - Interactive staging (for partial changes):
 ```bash
-# Create patch of specific hunks
 git diff HEAD -- path/to/file | git apply --cached
-# Or use git add -p for interactive staging
 ```
 
 **For Scenario B (new work):**
@@ -102,16 +109,14 @@ After successfully spinning off changes, **ask the user** whether to remove them
 If the user wants to remove the changes:
 
 ```bash
-# In original worktree
-cd ~/projects/kserve-ORIGINAL-TASK
+cd ORIGINAL_WORKTREE
 
 # Option 1: Revert specific commits
 git revert COMMIT_SHA --no-commit
 git commit -s -S -m "chore: extract DESCRIPTION to separate PR"
 
 # Option 2: Reset and re-stage without the spun-off files
-git reset HEAD~N  # N = number of commits containing spinoff changes
-# Re-stage only the changes you want to keep
+git reset HEAD~N
 git add -p
 git commit -s -S -m "original commit message"
 
@@ -124,9 +129,8 @@ git checkout -- path/to/files
 ### Phase 6: Push and Prepare PR
 
 ```bash
-cd ../kserve-spinoff-DESCRIPTION
+cd ../PREFIX-spinoff-DESCRIPTION
 
-# Push to personal fork
 git push -u origin spinoff/DESCRIPTION
 ```
 
@@ -145,19 +149,19 @@ Changes to spin off: {{changes}}
 - For new work: description of what needs to be done
 
 Target (optional): {{target}}
-- e.g., "upstream/master", "odh/release-v0.15"
+- e.g., "upstream/master", "odh/release-v0.17"
 - If omitted, will determine using pr-target logic
 
 ## Examples
 
-### Example 1: Extract a commit to upstream
+### Example 1: Extract a commit to upstream kserve
 
 ```
 /spinoff-pr changes:"commit abc123 - typo fix in docs" target:upstream/master
 ```
 
 Result:
-1. Creates `~/projects/kserve-spinoff-fix-docs-typo`
+1. Creates `kserve-spinoff-fix-docs-typo` worktree
 2. Cherry-picks abc123 onto fresh upstream/master base
 3. Pushes and prepares PR to kserve/kserve
 
@@ -185,7 +189,7 @@ Result:
 
 ## Key Principles
 
-1. **Never modify current worktree** - Always create new worktree from main repo
+1. **Never modify current worktree** - Always create new worktree from the repo directory
 2. **Always base on latest** - Fetch and branch from remote HEAD, not local
 3. **Clean commits** - Use `-s -S` for signed commits with DCO
 4. **Draft PRs** - Always create as draft until ready
@@ -196,5 +200,3 @@ Result:
 - `/pr-target` - Determine correct target fork/branch
 - `/jira-work` - Full JIRA-based workflow with research
 - `/jira` - Quick context fetch for existing worktree
-
-

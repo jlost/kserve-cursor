@@ -1,15 +1,26 @@
 <a href="./kserve-agent.png"><img src="./kserve-agent.png" alt="KServe Agent Demo" width="256" align="right"></a>
 
-# 🤖 KServe Agentic Prompts
+# Model Serving Agentic Prompts
 
-AI agent rules and commands for developing KServe on OpenShift. Companion to [kserve-workspace](https://github.com/jlost/kserve-workspace).
+AI agent rules and commands for developing the RHOAI Model Serving stack (kserve + odh-model-controller) on OpenShift.
 
-## 🚀 Setup
+## Workspace Structure
 
-1. Clone [kserve-workspace](https://github.com/jlost/kserve-workspace) as `.vscode`:
+```
+model-serving/              # Workspace root -- open Cursor here
+├── .cursor/                # This repo (agentic prompts)
+├── kserve/                 # kserve repo
+├── odh-model-controller/   # odh-model-controller repo
+└── .vscode/                # Optional: kserve-workspace
+```
+
+## Setup
+
+1. Create the workspace directory and clone repos:
     ```sh
-    cd kserve
-    git clone git@github.com:jlost/kserve-workspace.git .vscode
+    mkdir -p ~/projects/model-serving && cd ~/projects/model-serving
+    git clone git@github.com:<you>/kserve.git kserve
+    git clone git@github.com:<you>/odh-model-controller.git odh-model-controller
     ```
 
 2. Clone this repo as `.cursor`:
@@ -17,17 +28,14 @@ AI agent rules and commands for developing KServe on OpenShift. Companion to [ks
     git clone git@github.com:jlost/kserve-prompts.git .cursor
     ```
 
-3. Symlink global rules (one-time):
+3. Optionally clone [kserve-workspace](https://github.com/jlost/kserve-workspace) as `.vscode`:
     ```sh
-    mkdir -p ~/.cursor/rules
-    ln -sf "$(pwd)/.cursor/global-rules/odh-fork-structure.mdc" ~/.cursor/rules/
+    git clone git@github.com:jlost/kserve-workspace.git .vscode
     ```
 
-4. Configure MCP servers - set env vars in `~/.zshenv`:
+4. Configure MCP servers -- set env vars in `~/.zshenv`:
     ```sh
     export GITHUB_MCP_TOKEN="ghp_xxxx"
-    export JIRA_URL="https://issues.redhat.com"
-    export JIRA_PERSONAL_TOKEN="your-token"
     # Slack integration (extract from browser cookies)
     # See: https://github.com/maorfr/slack-token-extractor
     export SLACK_XOXC_TOKEN="xoxc-xxxx"
@@ -35,20 +43,24 @@ AI agent rules and commands for developing KServe on OpenShift. Companion to [ks
     ```
     Then run: `.cursor/scripts/setup-mcp.sh`
 
-5. Start Cursor: `cursor .`
+    **Note:** Jira/Confluence uses the official [Atlassian Rovo MCP Server](https://github.com/atlassian/atlassian-mcp-server) with OAuth 2.1. On first use, a browser window opens for Atlassian login. No tokens needed.
 
-## 📦 Contents
+5. Start Cursor from the workspace root: `cursor ~/projects/model-serving`
 
-- **`rules/`** - Context rules for the AI (fork structure, git workflow, testing, etc.)
-- **`global-rules/`** - Cross-repo rules to symlink to `~/.cursor/rules/`
-- **`commands/`** - Slash commands (WIP)
+## Contents
 
-## 🔧 MCP Tool Settings
+- **`rules/`** - Context rules for the AI (workspace layout, fork structures, git workflow, testing, etc.)
+- **`commands/`** - Slash commands (jira-work, rhoai-cve, spinoff-pr, etc.)
+- **`skills/`** - Reusable skill definitions (dev-environments, jira-github-workflow, etc.)
 
-The `mcp.json` spec doesn't yet support specifying which tools are enabled/disabled. Until then, manually configure your Cursor MCP settings to match:
+## MCP Servers
 
-![MCP Tool Settings](./enabled_tools.png)
+| Server | Auth | Description |
+|--------|------|-------------|
+| `github` | Token (env var) | GitHub Copilot MCP |
+| `mcp-atlassian` | OAuth 2.1 (browser) | [Atlassian Rovo](https://github.com/atlassian/atlassian-mcp-server) - Jira + Confluence |
+| `slack` | Cookies (env var) | Slack MCP via Podman |
 
-## 🤝 Contributing
+## Contributing
 
-**Live with changes before proposing them.** Use new rules for at least a week across varied tasks before submitting a PR. Prompt engineering is empirical - what seems like an improvement may not work in practice.
+**Live with changes before proposing them.** Use new rules for at least a week across varied tasks before submitting a PR. Prompt engineering is empirical -- what seems like an improvement may not work in practice.

@@ -7,24 +7,8 @@
       }
     },
     "mcp-atlassian": {
-      "command": "podman",
-      "args": [
-        "run",
-        "--rm",
-        "-i",
-        "-e",
-        "JIRA_URL",
-        "-e",
-        "JIRA_PERSONAL_TOKEN",
-        "-e",
-        "JIRA_SSL_VERIFY",
-        "ghcr.io/sooperset/mcp-atlassian:latest"
-      ],
-      "env": {
-        "JIRA_URL": "${JIRA_URL}",
-        "JIRA_PERSONAL_TOKEN": "${JIRA_PERSONAL_TOKEN}",
-        "JIRA_SSL_VERIFY": "true"
-      }
+      "type": "http",
+      "url": "https://mcp.atlassian.com/v1/mcp"
     },
     "slack": {
       "command": "podman",
@@ -51,4 +35,3 @@
     }
   }
 }
-

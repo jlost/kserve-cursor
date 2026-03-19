@@ -7,6 +7,7 @@ Start working on a JIRA issue in the current worktree. This is the entry point f
 This command assumes:
 - You're in a git worktree created by `setup-worktree.sh`
 - The worktree has a branch tracking the appropriate base (can be corrected if wrong)
+- You know which repo this work targets (see `workspace.mdc` for detection)
 
 ## Instructions
 
@@ -24,7 +25,9 @@ Read and follow the research workflow in `.cursor/commands/jira-research.md`:
 2. **Deep search GitHub** across all forks using GitHub MCP:
    - Search by JIRA key in PRs, issues, commits
    - Search by keywords/error messages from JIRA
-   - Check all three forks: `kserve/kserve`, `opendatahub-io/kserve`, `red-hat-data-services/kserve`
+   - Check all forks:
+     - kserve: `kserve/kserve`, `opendatahub-io/kserve`, `red-hat-data-services/kserve`
+     - omc: `opendatahub-io/odh-model-controller`, `red-hat-data-services/odh-model-controller`
 
 3. **Search Slack** for relevant discussions (if appropriate)
 
@@ -38,26 +41,33 @@ Read and follow the research workflow in `.cursor/commands/jira-research.md`:
 
 ### Phase 2: Validate Target Branch
 
-Check if the current worktree branch is based on the correct upstream:
+Check if the current worktree branch is based on the correct upstream.
+Run from within the repo directory (e.g., `kserve/` or worktree root):
 
 ```bash
-# Get current branch and its upstream
 git rev-parse --abbrev-ref HEAD
 git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null || echo "no upstream"
-
-# Check which remote/branch this was based on
-git log --oneline -1 $(git merge-base HEAD odh/release-0.15 2>/dev/null || echo HEAD)
-git log --oneline -1 $(git merge-base HEAD upstream/master 2>/dev/null || echo HEAD)
 ```
 
-Apply branch targeting rules from `fork-structure.mdc`:
+Apply branch targeting rules from fork-structure rules (`fork-structure.mdc` for kserve, `omc-fork-structure.mdc` for omc):
+
+**kserve:**
 
 | Scenario | Target Fork | Base Branch |
 |----------|-------------|-------------|
 | General KServe bug/feature | upstream | `master` |
-| OpenShift-specific change | odh | `release-0.15` |
-| ODH release fix | odh | `release-0.15` |
+| OpenShift-specific change | odh | `release-v0.17` |
+| ODH release fix | odh | `release-v0.17` |
 | Downstream-only change (rare) | downstream | `main` |
+
+**odh-model-controller:**
+
+| Scenario | Target Fork | Base Branch |
+|----------|-------------|-------------|
+| ODH feature (latest) | odh | `master` |
+| ODH feature (older) | odh | `stable-X.x` |
+| Downstream-only change (latest) | downstream | `main` |
+| Downstream-only change (older) | downstream | `rhoai-X.Y` |
 
 **If current base doesn't match recommendation:**
 - Present the mismatch to user
@@ -109,13 +119,20 @@ mcp_ignition-mcp_task_recreate_e2e_ns
 
 ### Phase 4: Test Discovery and Reproduction (TDD)
 
-Follow the TDD workflow from `tdd-workflow.mdc`:
+Follow the TDD workflow from `tdd-workflow.mdc`.
 
-**Find existing tests:**
-- E2E tests: `test/e2e/` - Python pytest with markers
-- Controller tests: `pkg/controller/**/*_test.go`
-- Webhook tests: `pkg/webhook/**/*_test.go`
-- API tests: `pkg/apis/**/*_test.go`
+**Find existing tests** (paths relative to workspace root):
+
+**kserve:**
+- E2E tests: `kserve/test/e2e/` - Python pytest with markers
+- Controller tests: `kserve/pkg/controller/**/*_test.go`
+- Webhook tests: `kserve/pkg/webhook/**/*_test.go`
+- API tests: `kserve/pkg/apis/**/*_test.go`
+
+**odh-model-controller:**
+- E2E tests: `odh-model-controller/test/e2e/`
+- Controller tests: `odh-model-controller/controllers/*_test.go`
+- Webhook tests: `odh-model-controller/webhooks/*_test.go`
 
 Search strategies:
 - Feature/component name in test file names
@@ -177,7 +194,7 @@ Follow the jira-github-workflow skill: `.cursor/skills/jira-github-workflow/SKIL
 - Always create as **draft** first
 - Include JIRA key in title for ODH/downstream PRs: `[RHOAIENG-1234] Fix description`
 - Do NOT include JIRA key in upstream PR titles
-- Use PR template from `.github/PULL_REQUEST_TEMPLATE.md`
+- Use PR template from the repo's `.github/PULL_REQUEST_TEMPLATE.md`
 
 **Link JIRA:**
 - For ODH/downstream: DPTP bot auto-links from PR title

@@ -25,29 +25,29 @@ The action must match any of the following actions and the parameters can be fre
       - KServe Controller
       - KServe Router
       - KServe Agent
-    - **False Positive Closure Procedure**: When closing a ticket as false positive, you **must** follow these steps in order using the `mcp-atlassian` MCP server tools:
-      1. **Add a comment** explaining why it is a false positive using `mcp__mcp-atlassian__jira_add_comment`
-      2. **Set the VEX Justification** field (`customfield_10873`, a dropdown/select field) to `"Vulnerable Code not in Execute Path"` using `mcp__mcp-atlassian__jira_update_issue` with fields: `{"customfield_10873": {"value": "Vulnerable Code not in Execute Path"}}`
-      3. **Close the ticket** with resolution **"Not a Bug"** using `mcp__mcp-atlassian__jira_transition_issue` with transition_id `61` (Closed) and fields: `{"resolution": {"name": "Not a Bug"}}`
+    - **False Positive Closure Procedure**: When closing a ticket as false positive, you **must** follow these steps in order using the `mcp-atlassian` MCP server tools (all calls require `cloudId: "https://issues.redhat.com"`):
+      1. **Add a comment** explaining why it is a false positive using `addCommentToJiraIssue` with `contentFormat: "markdown"`
+      2. **Set the VEX Justification** field (`customfield_10873`, a dropdown/select field) to `"Vulnerable Code not in Execute Path"` using `editJiraIssue` with fields: `{"customfield_10873": {"value": "Vulnerable Code not in Execute Path"}}`
+      3. **Close the ticket** with resolution **"Not a Bug"** using `transitionJiraIssue` with transition `{"id": "61"}` and fields: `{"resolution": {"name": "Not a Bug"}}`
       - **Note**: Steps 2 and 3 can be executed in parallel. Step 1 must happen first so the comment is visible before closure.
-      - **Important**: Always use `mcp__mcp-atlassian__jira_get_transitions` to confirm the correct transition ID before closing, as it may vary by project/workflow.
-    - If the above is not true and the current CVE is affecting GoLang codebase, we need to test the above binaires with `go-vulcheck` tool
-      - First step, build the binary:
-      - KServe Controller: `make manager`
-      - KServe Router: `make router`
-      - KServe Agent: `make agent`
-      - ODH-Model-Controller: `make build`
-    - To build containers:
-      - KServe Controller: `make docker-build`
-      - KServe Router: `make router`
-      - KServe Agent: `make agent`
-      - KServe Storage Initializer: `make docker-build-storageInitializer `
-      - ODH-Model-Controller: `make build`
+      - **Important**: Always use `getTransitionsForJiraIssue` to confirm the correct transition ID before closing, as it may vary by project/workflow.
+    - If the above is not true and the current CVE is affecting GoLang codebase, we need to test the above binaries with `go-vulcheck` tool
+      - First step, build the binary (run from the repo directory):
+      - KServe Controller: `cd kserve && make manager`
+      - KServe Router: `cd kserve && make router`
+      - KServe Agent: `cd kserve && make agent`
+      - ODH-Model-Controller: `cd odh-model-controller && make build`
+    - To build containers (run from the repo directory):
+      - KServe Controller: `cd kserve && make docker-build`
+      - KServe Router: `cd kserve && make router`
+      - KServe Agent: `cd kserve && make agent`
+      - KServe Storage Initializer: `cd kserve && make docker-build-storageInitializer`
+      - ODH-Model-Controller: `cd odh-model-controller && make build`
     - Understand and provide the proper fix, ALWAYS ask review from the human in charge.
     - For any CVE also check if the need is also fix on KServe Community
-    - For Python Packages always check all the `pyproject.toml` and the `uv.lcok` files in which contains the affected dependency.
-      - Note that, most of the dependencies comes from the main KServe module, so, if it is the case, the change must be applied in the `python/kserve/pyproject.toml` and the lock needs to be updated.
-        - to update all needed lock files execute `make precommit`
+    - For Python Packages always check all the `pyproject.toml` and the `uv.lock` files in which contains the affected dependency.
+      - Note that, most of the dependencies comes from the main KServe module, so, if it is the case, the change must be applied in `kserve/python/kserve/pyproject.toml` and the lock needs to be updated.
+        - to update all needed lock files execute `cd kserve && make precommit`
     - The contaiers should be built for upstream and ODH only if both are affected.
   - If the issue is in the backlog, you should do the following actions:
     - Assign the issue to the user that has requested the fix
@@ -65,16 +65,16 @@ The action must match any of the following actions and the parameters can be fre
       1. **Query backlog issues** using JQL: `status = new AND description !~ "CVE*|Snyk" and component = "Model Serving" and labels in (Security)`
       2. **Exclude llm-d related CVEs** from assignment. For those, add a FYI comment tagging `[~allausas@redhat.com]` instead.
       3. **Distribute remaining issues equally** among the team members listed above.
-      4. **Move issues to the sprint** using `mcp__mcp-atlassian__jira_add_issues_to_sprint` with the confirmed sprint ID.
-      5. **Assign issues** using `mcp__mcp-atlassian__jira_update_issue` with `assignee` set to the user's **email address**.
-         - **Important**: Do NOT use `mcp__my-mcp__jira_assign_issue` or Jira username formats (`rhn-support-*`, `rh-ee-*`) — these silently fail without returning an error. Always use email format via `mcp__mcp-atlassian__jira_update_issue`.
-      6. **Set Story Points and Ready field** on all assigned issues using `mcp__mcp-atlassian__jira_update_issue` with `additional_fields`:
+      4. **Move issues to the sprint** using `editJiraIssue` to set the sprint field on each issue.
+      5. **Assign issues** using `editJiraIssue` with fields setting `assignee`. Use `lookupJiraAccountId` to resolve email addresses to account IDs first.
+         - **Important**: Do NOT use Jira username formats (`rhn-support-*`, `rh-ee-*`) -- these silently fail. Always look up the account ID by email via `lookupJiraAccountId`, then use `editJiraIssue`.
+      6. **Set Story Points and Ready field** on all assigned issues using `editJiraIssue` with fields:
          ```json
          {"customfield_10028": 1, "customfield_10484": "True"}
          ```
          - `customfield_10028` = Story Points (numeric)
          - `customfield_10484` = Ready field (string: "True" / "False")
-      7. **Set Priority based on CVE Severity** on all assigned issues using `mcp__mcp-atlassian__jira_update_issue` with `fields`:
+      7. **Set Priority based on CVE Severity** on all assigned issues using `editJiraIssue` with `fields`:
          - Read the Severity field (`customfield_10840`) from each issue and map it to Jira priority:
            | Severity (customfield_10840) | Jira Priority |
            |------------------------------|---------------|
@@ -86,10 +86,10 @@ The action must match any of the following actions and the parameters can be fre
          - CVSS Score is available in `customfield_10859` for reference
     - **Board reference**: "Model Servers and Metrics" board ID **1127**
 - verify-pined
-  - verify if the pined versions upgrades due transitive dependencies can be removed, it happens when the library that has this dependency is updated.
-    - you should verify:
+  - verify if the pinned versions upgrades due transitive dependencies can be removed, it happens when the library that has this dependency is updated.
+    - you should verify (paths relative to the target repo root):
       - go.mod -> replace entries
-      - pyproject.toml files under `python` directory for any pined dependency. Example:
+      - pyproject.toml files under `python/` directory (kserve only) for any pinned dependency. Example:
         - ```asciidoc
         # CVE-2026-24486 Python-Multipart has Arbitrary File Write via Non-Default Configuration
         # Pinning because it is a transitive dependency.
@@ -97,7 +97,7 @@ The action must match any of the following actions and the parameters can be fre
 
 
 ## Mandatory Rules
-- Always run `make precommit` and build the affected containers before sending the pull requests
+- Always run `make precommit` from the affected repo directory and build the affected containers before sending the pull requests
 - For ODH and RHOAI repositories, the branch name must **always** be the Jira ID, example: RHOAIENG-12345
   - The commit Tittle must match: [JIRA_ID] CVE_ID: CVE_DESCRIPTION
     - Example of full commit tittle and description:
@@ -119,9 +119,10 @@ The action must match any of the following actions and the parameters can be fre
 - Current ODH-Model-Controller release branch is `main`
 - Never include non-related changes.
   - `make precommit` can sometimes update `go.mod`, but it should be taken only when **Go libraries** are updated.
+- Determine the target repo (kserve or odh-model-controller) using `workspace.mdc` and `repo-scope.mdc` before starting any fix.
 - Before proceeding any further to fix a issue, enlist all the tasks that will be done and ask user to give OK.
 - The pull requests should **always** be added in the `Git Pull Request` field as well.
-- Do not upgrade uv version, use the same as in use. The version can be found in the `kserve-deps.env` file, and installed by the `hack/setup/cli/install-uv.sh` script 
+- Do not upgrade uv version, use the same as in use. The version can be found in `kserve/kserve-deps.env`, and installed by `kserve/hack/setup/cli/install-uv.sh`
 
 
 ## What This Command Does
@@ -209,8 +210,8 @@ When user runs `/rhoai-cve [ACTION]`, you should:
     - **Move the issue from the current status to `Review`**: after all checks pass (unit tests, container builds) and PRs are submitted, transition the issue to `Review`.
     - **Move the issue to `Resolved`**: only after PRs are merged and the fix is confirmed in a build.
 
-## Items that can skip humam approval:
-- mcp-attlassian - Handle all tasks
+## Items that can skip human approval:
+- mcp-atlassian - Handle all tasks
 
 ### Length Flexibility
 - **2-4 sentences**: Standard for most updates

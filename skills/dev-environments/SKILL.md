@@ -1,6 +1,6 @@
 ---
 name: dev-environments
-description: Set up development environments for KServe. Use when setting up Kind or CRC clusters, running E2E tests, starting devspace, or deploying local code changes.
+description: Set up development environments for kserve or odh-model-controller. Use when setting up Kind or CRC clusters, running E2E tests, starting devspace, or deploying local code changes.
 ---
 # Development Environments
 
@@ -9,16 +9,18 @@ description: Set up development environments for KServe. Use when setting up Kin
 | Fork | Environment | Cluster Type |
 |------|-------------|--------------|
 | Upstream (kserve/kserve) | Kind | Kubernetes |
-| ODH (opendatahub-io/kserve) | CRC | OpenShift |
-| Downstream (red-hat-data-services/kserve) | CRC | OpenShift |
+| ODH (opendatahub-io/kserve or omc) | CRC | OpenShift |
+| Downstream (red-hat-data-services/*) | CRC | OpenShift |
 
 **Kind and CRC cannot run simultaneously.** Stop one before starting the other.
 
 ## Quick Reference
 
-**Detect target fork first** using branch/tracking signals from `fork-structure.mdc`:
+**Detect target fork first** using branch/tracking signals from the fork-structure rules:
 - Branch `RHOAIENG-*` or tracking `odh/*` -> CRC
 - Branch `master` or tracking `upstream/*` -> Kind
+
+Run git commands from within the target repo directory (e.g., `kserve/` or `odh-model-controller/`).
 
 ### Upstream -> Kind
 

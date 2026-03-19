@@ -1,6 +1,7 @@
 ---
-description: ODH two-tier fork hierarchy and branch targeting rules
-alwaysApply: true
+description: odh-model-controller two-tier fork hierarchy and branch targeting
+globs: odh-model-controller/**
+alwaysApply: false
 ---
 
 # ODH Fork Structure

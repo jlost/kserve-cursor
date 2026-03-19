@@ -1,6 +1,6 @@
 # Branch Compare
 
-Analyze divergence between KServe forks to find merge issues, missing syncs, or botched cherry-picks.
+Analyze divergence between forks (kserve or odh-model-controller) to find merge issues, missing syncs, or botched cherry-picks.
 
 ## Instructions
 
@@ -66,6 +66,8 @@ Branch B: {{branch_b}} (e.g., "odh/master", "opendatahub-io/kserve master")
 Focus area (optional): {{focus_path}} (e.g., "pkg/controller/", "config/")
 
 ## Git Commands for Reference
+
+Run from within the target repo directory (e.g., `kserve/` or `odh-model-controller/`):
 
 ```bash
 # Compare branches (run locally)

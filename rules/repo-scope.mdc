@@ -19,7 +19,7 @@ This controller **extends** KServe with OpenShift/ODH integrations. It does NOT 
 - Model Registry sync
 - Webhooks (protected namespace validation, default annotations)
 
-## Belongs to KServe (NOT this repo)
+## Belongs to KServe (kserve/)
 
 - Predictor/Transformer/Explainer Deployments
 - Model loading, storage access, container images

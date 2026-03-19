@@ -1,6 +1,6 @@
 ---
 name: diagnose-ci-failures
-description: Diagnose errors in all failed Prow CI jobs for a given GitHub PR. Use when the user shares a PR URL and asks to check CI logs, investigate test failures, or understand why CI is failing.
+description: Diagnose errors in all failed Prow CI jobs for a given GitHub PR (kserve or odh-model-controller). Use when the user shares a PR URL and asks to check CI logs, investigate test failures, or understand why CI is failing.
 ---
 
 # Diagnose CI Failures

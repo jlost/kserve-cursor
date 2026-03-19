@@ -1,72 +1,69 @@
 # JIRA Reference
 
-## JIRA Markup (Not Markdown)
+## Description Format
 
-JIRA does NOT support Markdown. Use JIRA wiki markup:
+The Rovo MCP supports `contentFormat: "markdown"` -- always use this when creating or editing
+issues. Write descriptions in standard Markdown and the API converts them automatically.
 
-| Element | Markdown | JIRA Markup |
-|---------|----------|-------------|
-| Bold | `**text**` | `*text*` |
-| Italic | `_text_` | `_text_` |
-| Code inline | `` `code` `` | `{{code}}` |
-| Code block | ` ```lang ``` ` | `{code:lang}...{code}` |
-| Link | `[text](url)` | `[text\|url]` |
-| Bullet list | `- item` | `* item` |
-| Numbered list | `1. item` | `# item` (see note) |
-| Heading | `## Heading` | `h2. Heading` |
+**Always pass these parameters:**
+- `contentFormat: "markdown"` (for input -- descriptions, comments)
+- `responseContentFormat: "markdown"` (for output -- readable responses)
 
-**Numbered list bug:** When using `# item` via MCP, `#` may convert to `h1.` (heading). Workarounds:
-- Use bullet lists (`* item`) instead
-- Fix manually in JIRA UI after creation
-- Use explicit numbering: `1. item`, `2. item`
+## Rovo MCP Defaults
+
+All Jira MCP tool calls require `cloudId`. Use `"https://issues.redhat.com"` for Red Hat JIRA.
+
+Use `responseContentFormat: "markdown"` to get readable content instead of ADF JSON.
 
 ## Fetching JIRA Context
 
 When fetching a JIRA issue:
 
-1. Use `fields: "*all"` and `expand: "changelog"` for complete info
+1. Call `getJiraIssue` with `expand: "changelog"` for complete info
 2. Check changelog for **RemoteIssueLink** entries (GitHub PR/issue links)
-3. Check comments for PR links (especially upstream PRs)
+3. Call again with `fields: ["comment"]` to fetch comments separately
 4. Follow ALL linked PRs, issues, and related JIRAs
 5. Check parent issues and sub-tasks
 
-## Fetching Comments
-
-Comments are controlled by the `comment_limit` parameter (default: 10, max: 100):
-
 ```
-jira_get_issue(
-  issue_key="RHOAIENG-1234",
-  fields="summary,status,description",
-  comment_limit=20
+getJiraIssue(
+  cloudId="https://issues.redhat.com",
+  issueIdOrKey="RHOAIENG-1234",
+  expand="changelog",
+  responseContentFormat="markdown"
 )
 ```
 
-Key points:
-- `comment_limit` controls how many comments are included (set to 0 to exclude)
-- Default is 10 comments - set higher if you need more context
-- Comments appear in the response under the `comment` field
+To fetch specific fields only:
 
-**Default fields** (when `fields` is omitted):
-`reporter,labels,priority,assignee,issuetype,updated,summary,description,created,status`
+```
+getJiraIssue(
+  cloudId="https://issues.redhat.com",
+  issueIdOrKey="RHOAIENG-1234",
+  fields=["summary", "status", "description", "comment"],
+  responseContentFormat="markdown"
+)
+```
 
 ## Custom Field Reference
 
-| Field | Custom Field ID | Field Type | Value Format |
-|-------|-----------------|------------|--------------|
-| Priority | `priority` | Standard | `{"name": "Normal"}` |
-| Team | `customfield_12313240` | Teams plugin | `"4156"` (string ID) |
-| Activity Type | `customfield_12320040` | Select | `{"value": "General Engineering"}` |
-| Sprint | `customfield_12310940` | Greenhopper | `81370` (integer ID) |
-| Git Pull Request | `customfield_12310220` | Multi-URL | `["https://..."]` |
+| Field | Custom Field ID | Value Format |
+|-------|-----------------|--------------|
+| Priority | `priority` | `{"name": "Normal"}` |
+| Sprint | `customfield_10020` | `17570` (integer ID, changes each sprint) |
+| Team | `customfield_10001` | `"ec74d716-af36-4b3c-950f-f79213d08f71-2896"` (string, UUID-based) |
+| Git Pull Request | `customfield_12310220` | `["https://..."]` |
+| Activity Type | Unknown | Not found in field metadata; set manually in JIRA UI |
 
 **Priority:** Always set to `"Normal"` (do not leave as "Undefined")
 
 **Team IDs:**
-- `"4156"` = "RHOAI Model Server and Serving Metrics" (default)
-- `"4155"` = "RHOAI Model Serving Runtimes"
+- `"ec74d716-af36-4b3c-950f-f79213d08f71-2896"` = "RHOAI Model Server and Serving Metrics" (default)
 
-**Activity Type values:** `"General Engineering"`, `"Usability"`, `"Regression"`
+To discover other team IDs, search for an issue with the desired team set and read `customfield_10001`.
+
+**Activity Type values** (set manually in JIRA UI):
+`"General Engineering"`, `"Usability"`, `"Regression"`
 
 ## Issue Type Selection
 
@@ -81,17 +78,20 @@ Key points:
 
 ## Creating Issues
 
-The `additional_fields` parameter often fails during creation. Use a two-step approach:
+Use a two-step approach for reliability:
 
 **Step 1: Create with minimal fields**
 
 ```
-jira_create_issue(
-  project_key="RHOAIENG",
+createJiraIssue(
+  cloudId="https://issues.redhat.com",
+  projectKey="RHOAIENG",
   summary="Issue title",
-  issue_type="Task",
-  components="Model Serving",
-  description="Description in JIRA markup"
+  issueTypeName="Task",
+  description="Description text",
+  additional_fields={"components": [{"name": "Model Serving"}]},
+  contentFormat="markdown",
+  responseContentFormat="markdown"
 )
 ```
 
@@ -101,48 +101,64 @@ Some fields fail when updated together. Update them one at a time:
 
 ```
 # Priority
-jira_update_issue(issue_key="RHOAIENG-1234", fields={"priority": {"name": "Normal"}})
+editJiraIssue(cloudId="https://issues.redhat.com", issueIdOrKey="RHOAIENG-1234", fields={"priority": {"name": "Normal"}})
 
-# Parent (Epic link)
-jira_update_issue(issue_key="RHOAIENG-1234", fields={"parent": {"key": "RHOAIENG-5678"}})
-
-# Team
-jira_update_issue(issue_key="RHOAIENG-1234", fields={"customfield_12313240": "4156"})
+# Team (string, UUID-based ID)
+editJiraIssue(cloudId="https://issues.redhat.com", issueIdOrKey="RHOAIENG-1234", fields={"customfield_10001": "ec74d716-af36-4b3c-950f-f79213d08f71-2896"})
 
 # Sprint (integer, not string)
-jira_update_issue(issue_key="RHOAIENG-1234", fields={"customfield_12310940": 81370})
+editJiraIssue(cloudId="https://issues.redhat.com", issueIdOrKey="RHOAIENG-1234", fields={"customfield_10020": 17570})
+
+# Parent (Epic link)
+editJiraIssue(cloudId="https://issues.redhat.com", issueIdOrKey="RHOAIENG-1234", fields={"parent": {"key": "RHOAIENG-5678"}})
 ```
 
 ## Known API Quirks
 
 | Field | Issue | Workaround |
 |-------|-------|------------|
-| Activity Type | Update via API often fails silently | Set manually in JIRA UI |
+| Team | Pass string ID directly, NOT `{"id": "..."}` object | `"ec74d716-..."` not `{"id": "ec74d716-..."}` |
+| Activity Type | Field not in edit metadata; can't be set via API | Set manually in JIRA UI |
 | Parent/Epic | Update reports success but may not link | Verify after update; set manually if needed |
 | Multiple fields | Batch updates fail unpredictably | Update fields one at a time |
 
 ## Sprint (Always Add to Current)
 
-**Board ID:** `23162` (Kserve Squad board)
+New issues should always be added to the current sprint. The sprint ID changes each cycle, so look it up dynamically.
 
-New issues should always be added to the current sprint. The sprint ID changes each cycle, so look it up first:
+**Step 1: Find the active sprint ID**
+
+Search for a recent issue with a sprint, then fetch it to read `customfield_10020`:
 
 ```
-jira_search(
-  jql="project = RHOAIENG AND component = \"Model Serving\" AND Sprint IS NOT EMPTY",
-  fields="customfield_12310940",
-  limit=1
+searchJiraIssuesUsingJql(
+  cloudId="https://issues.redhat.com",
+  jql="project = RHOAIENG AND component = \"Model Serving\" AND Sprint IS NOT EMPTY ORDER BY updated DESC",
+  fields=["customfield_10020"],
+  maxResults=1,
+  responseContentFormat="markdown"
 )
 ```
 
-Look for `state=ACTIVE` in the response to get the sprint ID (e.g., `81370`).
-
-Then include it when creating/updating the issue:
+The search response may not include `customfield_10020` inline. If so, fetch the returned issue:
 
 ```
-jira_update_issue(
-  issue_key="RHOAIENG-1234",
-  fields={"customfield_12310940": 81370}
+getJiraIssue(
+  cloudId="https://issues.redhat.com",
+  issueIdOrKey="RHOAIENG-XXXXX",
+  responseContentFormat="markdown"
+)
+```
+
+Look for `customfield_10020` in the response. Find the entry with `"state": "active"` and note its `id` (e.g., `17570`).
+
+**Step 2: Set the sprint on the new issue**
+
+```
+editJiraIssue(
+  cloudId="https://issues.redhat.com",
+  issueIdOrKey="RHOAIENG-1234",
+  fields={"customfield_10020": 17570}
 )
 ```
 

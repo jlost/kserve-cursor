@@ -7,9 +7,11 @@ description: RHOAI Model Serving release and process workflows. Use when the use
 
 Use this skill when the user asks about getting changes into RHOAI, code freezes, CVE handling, or whether to work upstream vs ODH first.
 
+Applies to both repositories in this workspace: kserve and odh-model-controller.
+
 ## Two Workflows
 
-### 1. KServe / ModelMesh (this repo: opendatahub-io/kserve)
+### 1. KServe / ModelMesh (opendatahub-io/kserve)
 
 **Entry: Is this a new feature?**
 - **Yes** -> Can you contribute to upstream (kserve/kserve)?

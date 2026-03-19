@@ -8,6 +8,7 @@ When E2E tests fail, systematically gather information to diagnose the issue.
 
 1. **Understand the failure context**:
    - Which test marker/suite failed? (predictor, graph, path_based_routing)
+   - Which repo is the test from? (kserve or odh-model-controller)
    - What was the test attempting to do?
    - Is this a new failure or regression?
 
@@ -38,25 +39,22 @@ When E2E tests fail, systematically gather information to diagnose the issue.
    - Is the operator running?
    - Are CRDs installed?
 
-## Available VS Code Tasks
+## Test Locations
 
-Run these from the Command Palette (Ctrl+Shift+P -> "Tasks: Run Task"):
+**kserve:**
+- Test scripts: `kserve/test/scripts/openshift-ci/`
+- E2E tests: `kserve/test/e2e/`
 
-- **Setup E2E**: Initialize test environment with specified marker
-- **Teardown E2E**: Clean up test resources
-- **Recreate E2E ns**: Reset test namespace (quick cleanup)
-- **Apply DSCI + DSC**: Ensure ODH components are configured
-- **Create HF Token Secret**: Set up HuggingFace authentication
-
-## Test Scripts Reference
+**odh-model-controller:**
+- E2E tests: `odh-model-controller/test/e2e/`
 
 ```
-test/scripts/openshift-ci/
-├── setup-e2e-tests.sh      # Full E2E setup
-├── teardown-e2e-setup.sh   # Full E2E teardown
-├── setup-ci-namespace.sh   # Namespace setup only
-├── run-e2e-tests.sh        # Run tests
-└── common.sh               # Shared functions
+kserve/test/scripts/openshift-ci/
+├── setup-e2e-tests.sh
+├── teardown-e2e-setup.sh
+├── setup-ci-namespace.sh
+├── run-e2e-tests.sh
+└── common.sh
 ```
 
 ## User Input
@@ -132,4 +130,3 @@ oc logs -n redhat-ods-applications deployment/kserve-controller-manager --tail=1
 # Describe failing pod
 oc describe pod <pod-name> -n kserve-ci-e2e-test
 ```
-

@@ -60,7 +60,8 @@ CVE-2024-43598: Update lightgbm version to 4.6.0 (#4799)
 
 ### Changing the Base Branch In-Place
 
-If you started on the wrong base (e.g., ODH instead of upstream), rebase in-place:
+If you started on the wrong base (e.g., ODH instead of upstream), rebase in-place.
+Run from within the target repo directory (e.g., `kserve/` or `odh-model-controller/`):
 
 ```bash
 # Stash uncommitted changes

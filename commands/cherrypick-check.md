@@ -1,6 +1,8 @@
 # Cherry-Pick Check
 
-Find missing cherry-picks between KServe forks by comparing commits.
+Find missing cherry-picks between forks (kserve or odh-model-controller) by comparing commits.
+
+First determine which repo using `workspace.mdc` and `repo-scope.mdc`.
 
 ## Instructions
 
@@ -26,20 +28,21 @@ Given a source and target fork/branch, identify commits that exist in the source
 
 ## Common Scenarios
 
-### Upstream to ODH Master
-Check what upstream commits need syncing to ODH:
+### kserve
+
+**Upstream to ODH:**
 - Source: `kserve/kserve` master
-- Target: `opendatahub-io/kserve` master
+- Target: `opendatahub-io/kserve` release-v0.17
 
-### ODH Master to ODH Release Branch
-Check what ODH master commits should be backported:
-- Source: `opendatahub-io/kserve` master
-- Target: `opendatahub-io/kserve` release-vX.Y
-
-### ODH to Downstream
-Check what ODH commits need cherry-picking to downstream:
-- Source: `opendatahub-io/kserve` master or release branch
+**ODH to Downstream:**
+- Source: `opendatahub-io/kserve` release branch
 - Target: `red-hat-data-services/kserve` main
+
+### odh-model-controller
+
+**ODH Master to Downstream:**
+- Source: `opendatahub-io/odh-model-controller` master
+- Target: `red-hat-data-services/odh-model-controller` main
 
 ## User Input
 
@@ -48,8 +51,10 @@ Target: {{target_ref}} (e.g., "odh/release-v0.15", "downstream/main")
 
 ## Git Commands for Reference
 
+Run from within the target repo directory (e.g., `kserve/` or `odh-model-controller/`):
+
 ```bash
-# Find commits in source not in target (run locally)
+# Find commits in source not in target
 git log target_branch..source_branch --oneline --first-parent
 
 # Check if specific commit exists in branch
